@@ -190,7 +190,7 @@ $.get('user_info',function (data) {
     });
 });
 ```
-The second `<td>` tag we select above is one that contains the user's password in the user info page.
+The second `<td>` tag we select above is the one that contains the user's password in the user info page.
 
 Where are we going to inject into?  The ERB template used to display the messages loads all the posts in JSON format as an object inside a script tag.  The contents of that object are then added to the DOM using javascript.
 ``` html
@@ -283,7 +283,7 @@ And when the above is encoded with `String.fromCharCode` and put inside a `<scri
 Level 7
 -------
 
-Level 7 is WaffleCopter, an API for the delivery of waffles by helicopter.  When you log in, you're given a secret key.  You use this to sign a message ordering a delivery of waffles to your location.  Winning requires you to order the one of the decadent Liège Waffles that account you are given doesn't have access to. 
+Level 7 is WaffleCopter, an API for the delivery of waffles by helicopter.  When you log in, you're given a secret key.  You use this to sign a message ordering a delivery of waffles to your location.  Winning requires you to order one of the decadent Liège Waffles that the account you are given doesn't have access to. 
 
 An order is a post request with a signature, and you can view your previous orders and the orders of other users by navigating to "/logs/USERID".
 
