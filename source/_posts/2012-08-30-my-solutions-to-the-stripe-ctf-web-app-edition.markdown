@@ -1,4 +1,4 @@
-a---
+---
 layout: post
 title: "My Solutions to the Stripe CTF (Web App Edition)"
 date: 2012-08-30 17:55
