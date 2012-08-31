@@ -291,7 +291,7 @@ An order is a post request with a signature, and you can view your previous orde
 
 This is an order log for another user.  We know that this user is a premium subscriber because they are ordering the Dream waffle which is a premium item like the Liège waffles we have to order.
 
-To order a premium waffle we need this user's secret token. We can try and guess their password, or just order as them and forge their signature.
+To order a premium waffle we need this user's secret token. We can try and guess their password, or we can just order as them and forge their signature.
 
 The signature is computed as so:
 
@@ -312,7 +312,7 @@ I found a handy script to perform a SHA1 padding attack [here](http://www.vnsecu
 
 Running it I was able to generate a new message and signature, and submitting that allowed me to order the Liège Waffle.
 
-This level and the next were my favorites in the competition.  This challenge has you exploit a real world cryptographic attack against a signature scheme that is often found in practice.  Signature schemes that work this way are definitely out there --- see for example the Flickr paper linked above.
+This level and the next were my favorites in the competition.  This challenge has you exploit a real world cryptographic attack against a signature scheme that is often found in practice.  Signature schemes that work this way are definitely out there --- see, for example, the Flickr paper linked above.
 
 By the way, if you're reading this and wondering how to construct a signature scheme that's robust to these kinds of attacks, the answer is use an [HMAC](http://en.wikipedia.org/wiki/Hash-based_message_authentication_code)!  As you can see, rolling your own signature scheme is dangerous.  Always, always, always use an HMAC.  This is true not just for signatures but for other sensitive user controlled data you want to send down the pipe, such as viewstates.
 
