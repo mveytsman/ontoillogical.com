@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "My Solutions to the Stripe CTF (Web App Edition)"
+title: "My solutions to the Stripe CTF (web app edition)"
 date: 2012-08-30 17:55
 comments: true
 categories: security CTFs
@@ -137,7 +137,7 @@ end
 
 The first obvious move is to get authenticated somewhere.  The DomainAuthenticator server is limited to making outbound network requests only to other stripe servers, but luckily we can make arbitrary uploads to another stripe CTF server --- level 2.  Simply uploading a file that contains the string "AUTHENTICATED" to the level 2 upload field and using that as a pingback URL will allow us to authenticate with the level 2 domain with any username/password.
 
-After authenticating, stripe responds with: "Remote server responded with: AUTHENTICATED. Authenticated as user@level02-2.stripe-ctf.com!"  That got us in as a user of level02-2.stripe-ctf.com, but we want to be logged in as a user of level05-2.stripe-ctf.com.  The key observation here is that the regular expression used in `authenticated` matches when one of the lines of the body matches.  If we make sure that the file we uploaded to level2 contains a new line after AUTHENTICATED, the response after authentication will be "Remote server responded with: AUTHENTICATED\n. Authenticated as user@level02-2.stripe-ctf.com!", which will match that regular expression.  Since that response is coming from level05-2.stripe-ctf.com, that's enough to get us in.  
+After authenticating, stripe responds with: "Remote server responded with: AUTHENTICATED. Authenticated as user@level02-2.stripe-ctf.com!"  That got us in as a user of level02-2.stripe-ctf.com, but we want to be logged in as a user of level05-2.stripe-ctf.com.  The key observation here is that the regular expression used in `authenticated` matches per line, so we only need one of the lines of the response body to match.  If we make sure that the file we uploaded to level2 contains a new line after AUTHENTICATED, the response after authentication will be "Remote server responded with: AUTHENTICATED\n. Authenticated as user@level02-2.stripe-ctf.com!", which will match that regular expression.  Since that response is coming from level05-2.stripe-ctf.com, that's enough to get us in.  
 
 The `params` variable in Sinatra contains both POSTed data and values in the query string, so we can specify a pingback in the URL and it will still be picked up in a POST request.  I uploaded a file that contains the string "AUTHENTICATED\n" to level 2 at the URL `https://level02-2.stripe-ctf.com/user-iinxtuvzks/uploads/auth`, and then my pingback URL was  `https://level05-2.stripe-ctf.com/user-rpyvuiltkk/?pingback=https://level02-2.stripe-ctf.com/user-iinxtuvzks/uploads/auth`.  This causes the body of a response on the level-5-2.stripe-ctf.com domain to match the regex in `authenticated?`, and I am authenticated on the level 5 domain.
 
@@ -180,7 +180,7 @@ That is, a user may view their own password in the user info page:
 
 Once again, we need to use XSS+CSRF to cause the target user to reveal their password.  In this case we will post a message that contains an XSS vector that causes the viewer to get their password from the user info page and post it as a message. 
 
-The inection vector should cause the victim to grab the password from the user info page and post is a message.  It will look something like this:
+The injection vector should cause the victim to grab the password from the user info page and post a message.  It will look something like this:
 
 ```javascript
 $.get('user_info',function (data) {
@@ -190,7 +190,7 @@ $.get('user_info',function (data) {
     });
 });
 ```
-The second `<td>` tag we select above is the one that contains the user's password in the user info page.
+The second `<td>` tag we select above is one that contains the user's password in the user info page.
 
 Where are we going to inject into?  The ERB template used to display the messages loads all the posts in JSON format as an object inside a script tag.  The contents of that object are then added to the DOM using javascript.
 ``` html
@@ -255,7 +255,7 @@ Let's leave the quotes issue for now and get around the CSRF token. We can get a
 </script><script>
 ```
 
-This of course won't work because the quote filter will prevent us from posting a message will all of those quotes.  We can get around this by encoding each character our javascript as its ASCII value and then running it like `eval(String.fromCharCode(67,61 ...`.  I used [this](http://www.wocares.com/noquote.php) utility to help me encode everything.
+This of course won't work because the quote filter will prevent us from posting a message will all of those quotes.  We can get around this by encoding each character in our javascript as its ASCII value and then running it like `eval(String.fromCharCode(67,61//...)`.  I used [this](http://www.wocares.com/noquote.php) utility to help me encode everything.
 
 The above payload, when encoded with `String.fromCharCode` still doesn't work, and it took me a long time to figure out why.  
 
@@ -264,6 +264,7 @@ As it turns out, the target user's first post gives a big hint
 > example, have a very complicated password **(including apostrophes, quotes, you
 > name it!)**. But I remember it by clicking my name on the right-hand side and
 > seeing what my password is.
+
 The password contains some quotes so the target user won't be able to post it in a message.  We have to replace the quotes with something else.  The correct javascript is
 ``` javascript
 $.get('user_info', function (data) {
@@ -275,7 +276,7 @@ $.get('user_info', function (data) {
     });
 });
 ```
-And when the above is encodes with `String.fromCharCode` and put inside a `<script>` tag, the target user will post their password when viewing our post:
+And when the above is encoded with `String.fromCharCode` and put inside a `<script>` tag, the target user will post their password when viewing our post:
 
 ![Level 6 Solved](/assets/images/stripe-ctf/level6-solved.png)
 
