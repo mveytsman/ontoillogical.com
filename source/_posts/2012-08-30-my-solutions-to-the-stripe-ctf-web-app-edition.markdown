@@ -96,7 +96,7 @@ flask.session['user_id'] = user_id
 
 To log in as our target user, we need the `password_hash` from the database to match our supplied password salted and hashed.  
 
-Using a SQL injection, we can cause my query to return my precomputed values as the `password_hash` of a given user.  When we try to log in as the user `a' UNION SELECT ID, HASH, SALT;--`, the SQL query becomes `SELECT id, password_hash, salt FROM users WHERE username = 'a' UNION SELECT ID, HASH, SALT`
+Using a SQL injection, we can cause the query to return our precomputed values as the `password_hash` of a given user.  When we try to log in with the username `a' UNION SELECT ID, HASH, SALT;--`, the SQL query becomes `SELECT id, password_hash, salt FROM users WHERE username = 'a' UNION SELECT ID, HASH, SALT`
 
 Since there is no user 'a', the above will return one row, which contains the id, password hash, and salt that we supply.  We pick an arbitrary password and salt, compute the hash, and use that to be able to log in as any user.  Logging in as user 3 will give the password to the next level (the other users contain the solution to P=NP and the like).
 
