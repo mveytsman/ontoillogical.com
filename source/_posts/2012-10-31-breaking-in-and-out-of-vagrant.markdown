@@ -6,6 +6,8 @@ comments: false
 categories: security devops
 ---
 
+**You can also find this post on my consultancy's blog [here](http://finite.state.io/blog/2012/10/30/breaking-in-and-out-of-vagrant/) **
+
 [Vagrant](http://vagrantup.com/) is a great tool that allows you to
 easily spawn and configure lightweight VMs to use as development
 environments. Vagrant provides base installs of several flavours of
