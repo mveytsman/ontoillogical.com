@@ -5,6 +5,9 @@ date: 2012-08-30 17:55
 comments: true
 categories: security CTFs
 ---
+
+**You can also find this post on my consultancy's blog [here](http://finite.state.io/blog/2012/08/30/my-solutions-to-the-stripe-ctf-web-app-edition/) **
+
 Stripe recently ran a [CTF](https://stripe-ctf.com) focused on web application hacking.  It ended yesterday, and I decided to write up my solutions.  If you have any questions or find a bug in my solutions, you can reach me at **max [at] state.io**.
 
 First of all, I had an great time solving these challenges.  Big thanks to the Stripe team for creating such a fun game. I hope to see more CTFs from them in the future.
