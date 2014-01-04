@@ -6,7 +6,7 @@ comments: true
 categories: security iPhone
 ---
 
-**You can also find this post on my consultancy's blog [here](http://finite.state.io/blog/2012/11/09/hacking-letterpress/)
+**You can also find this post on my consultancy's blog [here](http://finite.state.io/blog/2012/11/09/hacking-letterpress/)**
 
 [Letterpress](http://www.atebits.com/letterpress/) is an iOS game
 that came out a few weeks ago and immediately became popular enough to [take down Apple's GameCenter](https://twitter.com/marcoarment/statuses/261337316268859392). It's a cross between [Scrabble and Go](http://daringfireball.net/linked/2012/10/24/letterpress). The game is played on a board made out of 25 letters and players take turns building words in order to capture the letters they use. 
