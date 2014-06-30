@@ -31,25 +31,25 @@ Hacker School blog posts (for sufficiently large n).
 I've started a lot of projects while here, but they fall into two main categories. Courses and Projects.
 
 ### Courses
-* I started (Write Yourself a Scheme in 48 Horus)[https://en.wikibooks.org/wiki/Write_Yourself_a_Scheme_in_48_Hours] with another Hacker Schooler (here)[https://github.com/mveytsman/scheme48]. I'm finding that I'm not getting a lot of out of it --- I'm running into a lot of issues that would be solved with a more traditional Haskell resource, so to that end,
-* I started Yorgey's Haskell (course)[http://www.cis.upenn.edu/~cis194/] (here)[https://github.com/mveytsman/scheme48]
-* I started working through this (exploitation)[http://www.trailofbits.com/training/assured_exploitation/] course.
-* I signed up for Dan Boneh's (crypto)[https://www.coursera.org/course/crypto] course which starts tomorrow.
+* I started [Write Yourself a Scheme in 48 Horus](https://en.wikibooks.org/wiki/Write_Yourself_a_Scheme_in_48_Hours) with another Hacker Schooler [here](https://github.com/mveytsman/scheme48). I'm finding that I'm not getting a lot of out of it --- I'm running into a lot of issues that would be solved with a more traditional Haskell resource, so to that end,
+* I started Yorgey's Haskell [course](http://www.cis.upenn.edu/~cis194/) [here](https://github.com/mveytsman/scheme48)
+* I started working through this [exploitation](http://www.trailofbits.com/training/assured_exploitation/) course.
+* I signed up for Dan Boneh's [crypto](https://www.coursera.org/course/crypto) course which starts tomorrow.
 
 This above is very ambitious, and I fully expect to not finish most of these. I'm pretty sure I'm not going to come back to the Haskell Scheme interpreter course. I would like to finish the Haskell and exploitation class. I've started the crypto class many times before already, so there's that.
 
 ### Projects
-* To prove to myself just how much better I understand Ruby then Haskell, I wrote a very simple (Scheme interpreter)[https://github.com/mveytsman/rubbyskeme] based on Norvig's (lispy)[http://norvig.com/lispy.html]
-* My main project so far is implementing an (emulator)[https://github.com/mveytsman/emm-ess-pee] for the (MSP430)[https://en.wikipedia.org/wiki/TI_MSP430] in clojure.
+* To prove to myself just how much better I understand Ruby then Haskell, I wrote a very simple [Scheme interpreter](https://github.com/mveytsman/rubbyskeme) based on Norvig's [lispy](http://norvig.com/lispy.html)
+* My main project so far is implementing an [emulator](https://github.com/mveytsman/emm-ess-pee) for the [MSP430](https://en.wikipedia.org/wiki/TI_MSP430) in clojure.
 
 ### Emulator
 The emulator project has been taking up most of my time here, and it's worth talking about it more. The MSP430 is the chipset
-used in the (MicroCorruption)[https://microcorruption.com/] hacking
-game. Working on the emulator has helped me get better at reversing the MIPS assembly used by the processor, and I finally got to the last (level)[https://microcorruption.com/profile/96] after a 5 month hiatus.
+used in the [MicroCorruption](https://microcorruption.com/) hacking
+game. Working on the emulator has helped me get better at reversing the MIPS assembly used by the processor, and I finally got to the last [level](https://microcorruption.com/profile/96) after a 5 month hiatus.
 
-I have two directions I want to take this emulator in. First of all, I have started reading (papers)[https://www.usenix.org/system/files/conference/woot12/woot12-final26.pdf] about using (SMT solvers)[https://en.wikipedia.org/wiki/Satisfiability_Modulo_Theories] in binary reverse engineering and exploitation. I would like to develop some heuristics for solving the microcorruption challenges automatically. Since I already have an emulator, the next step would be to emit SMT formulas based on execution traces. I don't actually understand how to solve the problem deeper then the above sentence, so the real next step is to read more papers.
+I have two directions I want to take this emulator in. First of all, I have started reading [papers](https://www.usenix.org/system/files/conference/woot12/woot12-final26.pdf) about using [SMT solvers](https://en.wikipedia.org/wiki/Satisfiability_Modulo_Theories) in binary reverse engineering and exploitation. I would like to develop some heuristics for solving the microcorruption challenges automatically. Since I already have an emulator, the next step would be to emit SMT formulas based on execution traces. I don't actually understand how to solve the problem deeper then the above sentence, so the real next step is to read more papers.
 
-The other direction I have been thinking about is to port my emulator from Clojure into Clojurescript and build a web-based UI around it. The microcorruption game has a web based emulator, but the emulation actually happens on a sever and the browser provides only the UI. I have this vague idea of using colors to map display bytes in memory and show a buffer overflow as mixing colors. That's about all I got though, but it's a good excuse to learn (Om)[https://github.com/swannodette/om].
+The other direction I have been thinking about is to port my emulator from Clojure into Clojurescript and build a web-based UI around it. The microcorruption game has a web based emulator, but the emulation actually happens on a sever and the browser provides only the UI. I have this vague idea of using colors to map display bytes in memory and show a buffer overflow as mixing colors. That's about all I got though, but it's a good excuse to learn [Om](https://github.com/swannodette/om).
 
 ## Future posts
 Next time I'll explain how the biggest lesson I learned from writing a emulator in a functional programming style was about testing and talk about writing my first (!) clojure macros.
