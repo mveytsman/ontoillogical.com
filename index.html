@@ -1,1 +1,1829 @@
-My Octopress Page is coming soon &hellip;
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Ontoillogical</title>
+  <meta name="author" content="Max Veytsman">
+
+  
+  <meta name="description" content="Last night, I was having a drink with a friend and he asked me what I
+liked about Clojure. Immutable data structures are coming in vogue
+outside &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://blog.ontoillogical.com">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Ontoillogical" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Fjalla+One' rel='stylesheet' type='text/css'>
+  
+
+</head>
+
+<body   class="collapse-sidebar sidebar-footer" >
+  <header role="banner">
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:blog.ontoillogical.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div class="blog-index">
+  
+  
+  
+    <article>
+      
+  <header>
+  
+    
+      <h1 class="entry-title"><a href="/blog/2014/10/18/solving-the-expression-problem-in-clojure/">Solving the Expression Problem in Clojure</a></h1>
+      
+      
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-10-18T12:09:36-04:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Last night, I was having a drink with a friend and he asked me what I
+liked about Clojure. Immutable data structures are coming in vogue
+<a href="https://github.com/facebook/immutable-js">outside</a> Clojure, and they
+don’t need to be sold very hard. I don’t know a lot about virtual
+machine optimization, but I’ve always been swayed by the argument that
+with the amount of dollars and intellectual effort spent on JVM
+optimization in the past decades, it’s pretty fast. Honestly, I just
+find <a href="http://xkcd.com/297/">parentheses</a> alluring.</p>
+
+<p>Then I tried to say something about how protocols elegantly solve the
+expression problem, my friend had no idea what I was talking about.</p>
+
+<p>I started writing an email about what I meant, and it morphed into this post.</p>
+
+<h2 id="the-expression-problem">The expression problem</h2>
+
+<p>To be honest, “a drink” is somewhat of an understatement, and I did a
+poor job of explaining what the expression problem actually is.</p>
+
+<p>The best explanation of the expression problem comes from
+<a href="http://c2.com/cgi/wiki?ExpressionProblem">c2.com</a>, and I include it
+almost in its entirety:</p>
+
+<blockquote>
+  <p>The “expression problem” is a phrase used to describe a dual problem that neither ObjectOrientedProgramming nor FunctionalProgramming fully addresses.</p>
+
+  <p>The basic problem can be expressed in terms of a simple example: Suppose you wish to describe shapes, including rectangles and circles, and you wish to compute the areas.</p>
+
+  <p>In FunctionalProgramming, you would describe a data type such as:</p>
+
+  <pre><code>type Shape = Square of side
+             | Circle of radius 
+</code></pre>
+
+  <p>Then you would define a single area function:</p>
+
+  <pre><code>define area = fun x -&gt; case x of
+    Square of side =&gt; (side * side)
+    | Circle of radius =&gt; (3.14 *  radius * radius)
+</code></pre>
+
+  <p>In ObjectOrientedProgramming, you would describe the data type such as:</p>
+
+  <pre><code>class Shape &lt;: Object
+  virtual fun area : () -&gt; double
+   
+class Square &lt;: Shape
+  side : double
+  area() =  side * side
+ 
+class Circle &lt;: Shape
+  radius : double
+  area() = 3.14 * radius * radius
+</code></pre>
+
+  <p>The ‘ExpressionProblem’ manifests when you wish to ‘extend’ the set of objects or functions.</p>
+
+  <ul>
+    <li>If you want to add a ‘triangle’ shape: 
+      <ul>
+        <li>the ObjectOrientedProgramming approach makes it easy (because you can simply create a new class)</li>
+        <li>but FunctionalProgramming makes it difficult (because you’ll need to edit every function that accepts a ‘Shape’ parameter, including ‘area’) </li>
+      </ul>
+    </li>
+    <li>OTOH, if you want add a ‘perimeter’ function: 
+      <ul>
+        <li>FunctionalProgramming makes it easy (simply add a new function ‘perimeter’)</li>
+        <li>while ObjectOrientedProgramming makes it difficult (because you’ll need to edit every class to add ‘perimeter()’ to the interface). </li>
+      </ul>
+    </li>
+  </ul>
+
+</blockquote>
+
+<h2 id="defining-some-shapes">Defining some shapes</h2>
+
+<p>Clojure’s <a href="http://clojure.org/datatypes">records</a> serve the purpose of types and classes in the examples above. </p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</pre></td><td class="code"><pre><code class="clojure"><span class="line"><span class="c1">;; We have circles with radii</span>
+</span><span class="line"><span class="p">(</span><span class="kd">defrecord </span><span class="nv">Circle</span> <span class="p">[</span><span class="nv">radius</span><span class="p">])</span>
+</span><span class="line">
+</span><span class="line"><span class="c1">;; and squares with sides, oh my!</span>
+</span><span class="line"><span class="p">(</span><span class="kd">defrecord </span><span class="nv">Square</span> <span class="p">[</span><span class="nv">side</span><span class="p">])</span>
+</span><span class="line">
+</span><span class="line"><span class="c1">;; Here&#39;s a circle</span>
+</span><span class="line"><span class="p">(</span><span class="k">def </span><span class="nv">my-circle</span> <span class="p">(</span><span class="nf">Circle.</span> <span class="mi">5</span><span class="p">))</span>
+</span><span class="line">
+</span><span class="line"><span class="c1">;; And a square!</span>
+</span><span class="line"><span class="p">(</span><span class="k">def </span><span class="nv">my-square</span> <span class="p">(</span><span class="nf">Square.</span> <span class="mi">4</span><span class="p">))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h2 id="adding-a-new-shape">Adding a new Shape</h2>
+
+<p>As the quote above says, in functional programming languages, defining a perimeter function is easy, but adding a new shape is hard. If our area function looks like this:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="clojure"><span class="line"><span class="p">(</span><span class="kd">defn </span><span class="nv">area</span> <span class="p">[</span><span class="nv">shape</span><span class="p">]</span>
+</span><span class="line">  <span class="p">(</span><span class="nb">cond </span>
+</span><span class="line">   <span class="p">(</span><span class="nb">instance? </span><span class="nv">Circle</span> <span class="nv">shape</span><span class="p">)</span> <span class="p">(</span><span class="nb">* </span><span class="nv">Math/PI</span> <span class="p">(</span><span class="ss">:radius</span> <span class="nv">shape</span><span class="p">)</span> <span class="p">(</span><span class="ss">:radius</span> <span class="nv">shape</span><span class="p">))</span>
+</span><span class="line">   <span class="p">(</span><span class="nb">instance? </span><span class="nv">Square</span> <span class="nv">shape</span><span class="p">)</span> <span class="p">(</span><span class="nb">* </span><span class="p">(</span><span class="ss">:side</span> <span class="nv">shape</span><span class="p">)</span> <span class="p">(</span><span class="ss">:side</span> <span class="nv">shape</span><span class="p">))))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>we can easily add a perimeter function in the same vein, but adding a
+new shape is harder.</p>
+
+<p>We can define a new record:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="clojure"><span class="line"><span class="p">(</span><span class="kd">defrecord </span><span class="nv">Triangle</span> <span class="p">[</span><span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">])</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>But now we’re stuck rewriting the <code>area</code> function to include <code>Triangle</code> in the switch statement. If we were using a shape library that didn’t have triangles, we would have a hard
+time extending it without forking their code.</p>
+
+<p>We need a better way to do polymorphism then a switch statement!</p>
+
+<p>One choice is <a href="http://clojure.org/multimethods">multi-methods</a>, but I’m going to focus on Protocols.</p>
+
+<h2 id="protocols">Protocols</h2>
+
+<p><a href="http://clojure.org/protocols">Protocols</a> are an abstract notion of
+interfaces from OO land. A protocol is simply a set of methods and
+their signatures. If a type participates in a protocol, there exists
+an implementation for that method for that type.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class="clojure"><span class="line"><span class="c1">;; Things that are Areable have an area method</span>
+</span><span class="line"><span class="p">(</span><span class="kd">defprotocol </span><span class="nv">Areable</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">area</span> <span class="p">[</span><span class="nv">this</span><span class="p">]))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>We use <code>extend-protocol</code> to define how <code>Square</code> and <code>Circle</code> implement the <code>Areable</code> protocol<sup id="fnref:1"><a href="#fn:1" class="footnote">1</a></sup>.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</pre></td><td class="code"><pre><code class="clojure"><span class="line"><span class="c1">;; Circles and Squares are Areable</span>
+</span><span class="line"><span class="p">(</span><span class="nf">extend-protocol</span> <span class="nv">Areable</span>
+</span><span class="line">  <span class="nv">Circle</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">area</span> <span class="p">[{</span><span class="nv">radius</span> <span class="ss">:radius</span><span class="p">}]</span> <span class="p">(</span><span class="nb">* </span><span class="nv">Math/PI</span> <span class="nv">radius</span> <span class="nv">radius</span><span class="p">))</span>
+</span><span class="line">  <span class="nv">Square</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">area</span> <span class="p">[{</span><span class="nv">side</span> <span class="ss">:side</span><span class="p">}]</span> <span class="p">(</span><span class="nb">* </span><span class="nv">side</span> <span class="nv">side</span><span class="p">)))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Protocol methods behave just like functions, with dispatch determined by the type of the argument:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</pre></td><td class="code"><pre><code class="clojure"><span class="line"><span class="c1">;; A circle with the radius 5</span>
+</span><span class="line"><span class="p">(</span><span class="k">def </span><span class="nv">my-circle</span> <span class="p">(</span><span class="nf">Circle.</span> <span class="mi">5</span><span class="p">))</span>
+</span><span class="line">
+</span><span class="line"><span class="p">(</span><span class="nf">area</span> <span class="nv">my-circle</span><span class="p">)</span>
+</span><span class="line"><span class="c1">; =&gt; 78.53981633974483</span>
+</span><span class="line">
+</span><span class="line"><span class="c1">;; A square with the side 5</span>
+</span><span class="line"><span class="p">(</span><span class="k">def </span><span class="nv">my-square</span> <span class="p">(</span><span class="nf">Square.</span> <span class="mi">5</span><span class="p">))</span>
+</span><span class="line">
+</span><span class="line"><span class="p">(</span><span class="nf">area</span> <span class="nv">my-square</span><span class="p">)</span>
+</span><span class="line"><span class="c1">; =&gt; 25</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>With protocols we simple extend the Triangle type to support the Areable protocol:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class="clojure"><span class="line"><span class="p">(</span><span class="nf">extend-type</span> <span class="nv">Triangle</span>
+</span><span class="line">  <span class="nv">Areable</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">area</span> <span class="p">[</span><span class="nv">this</span><span class="p">]</span> <span class="nv">...</span><span class="p">))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h2 id="adding-a-new-function">Adding a new function</h2>
+
+<p>The other part of the expression problem is defining a “perimeter”
+method. Types can implement multiple protocols, and this implementation can be
+written anywhere. You can define a new protocol, and then extend core
+Java classes to participate in it. If you come from the Ruby world,
+you might think that this is similar to monkey-patching, and it is.</p>
+
+<p>Because we can extend the <code>Circle</code> and <code>Square</code> types to participate
+in a new protocol, adding a perimeter is also straightforward:</p>
+
+<p>We define a new protocol</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="clojure"><span class="line"><span class="p">(</span><span class="kd">defprotocol </span><span class="nv">Perimeterable</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">perimeter</span> <span class="p">[</span><span class="nv">this</span><span class="p">]))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>and extend it to support <code>Circle</code> and <code>Square</code></p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</pre></td><td class="code"><pre><code class="clojure"><span class="line"><span class="p">(</span><span class="nf">extend-protocol</span> <span class="nv">Perimeterable</span>
+</span><span class="line">  <span class="nv">Circle</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">perimeter</span> <span class="p">[{</span><span class="nv">radius</span> <span class="ss">:radius</span><span class="p">}]</span> <span class="p">(</span><span class="nb">* </span><span class="mi">2</span> <span class="nv">Math/PI</span> <span class="nv">radius</span><span class="p">))</span>
+</span><span class="line">  <span class="nv">Square</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">perimeter</span> <span class="p">[{</span><span class="nv">side</span> <span class="ss">:side</span><span class="p">}]</span> <span class="p">(</span><span class="nb">* </span><span class="mi">4</span> <span class="nv">side</span><span class="p">)))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h2 id="on-monkey-patching">On “monkey-patching”</h2>
+
+<p>If you come from the Ruby world, the above code might remind you of
+monkey-patching. Monkey-patching certainly deserves its infamy, but
+it’s problems are misunderstood. Being able to add functionality to
+core types is not a bad thing! The issue is namespacing.</p>
+
+<p>What bothers many people about monkey-patching in Ruby is that you can load
+a library, and suddenly it injects all kinds of new methods into core
+classes you didn’t expect:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</pre></td><td class="code"><pre><code class="ruby"><span class="line"><span class="s2">&quot;string&quot;</span><span class="o">.</span><span class="n">methods</span><span class="o">.</span><span class="n">count</span>
+</span><span class="line"><span class="c1"># =&gt; 170</span>
+</span><span class="line"><span class="nb">require</span> <span class="s1">&#39;rails&#39;</span>
+</span><span class="line"><span class="s2">&quot;string&quot;</span><span class="o">.</span><span class="n">methods</span><span class="o">.</span><span class="n">count</span>
+</span><span class="line"><span class="c1"># =&gt; 225</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Now your code has 55 new methods in the String class, and who knows
+how many of the existing String methods you know and love have been
+redefined!</p>
+
+<p>In Clojure, you can extend core types to support whatever protocol you
+want, but participating in a protocol is just like defining some functions,
+and those functions are scoped to a namespace:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+</pre></td><td class="code"><pre><code class="clojure"><span class="line"><span class="p">(</span><span class="k">def </span><span class="nv">foo</span> <span class="nv">bar</span><span class="p">)</span>
+</span><span class="line"><span class="p">(</span><span class="nb">in-ns </span><span class="ss">&#39;monkeypatching</span><span class="p">)</span>
+</span><span class="line"><span class="c1">;; We&#39;re now in the monkeypatching namespace</span>
+</span><span class="line">
+</span><span class="line"><span class="p">(</span><span class="kd">defprotocol </span><span class="nv">Monkey</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">patch</span> <span class="p">[</span><span class="nv">this</span><span class="p">]))</span>
+</span><span class="line">
+</span><span class="line"><span class="c1">;; Let&#39;s let nil and String participate in this protocol</span>
+</span><span class="line"><span class="p">(</span><span class="nf">extend-protocol</span> <span class="nv">Monkey</span>
+</span><span class="line">  <span class="nv">nil</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">patch</span> <span class="p">[</span><span class="nv">this</span><span class="p">]</span> <span class="s">&quot;Check out this cool nil!&quot;</span><span class="p">)</span>
+</span><span class="line">  <span class="nv">String</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">patch</span> <span class="p">[</span><span class="nv">this</span><span class="p">]</span> <span class="s">&quot;I&#39;m an awesome string!&quot;</span><span class="p">))</span>
+</span><span class="line">
+</span><span class="line"><span class="p">(</span><span class="nf">patch</span> <span class="nv">nil</span><span class="p">)</span>
+</span><span class="line"><span class="c1">; =&gt; &quot;Check out this cool nil!&quot;</span>
+</span><span class="line"><span class="p">(</span><span class="nf">patch</span> <span class="s">&quot;this is some string&quot;</span><span class="p">)</span>
+</span><span class="line"><span class="c1">; =&gt; &quot;I&#39;m an awesome string!&quot;</span>
+</span><span class="line">
+</span><span class="line"><span class="c1">;; Now we switch back to another namespace to do some hard work</span>
+</span><span class="line"><span class="p">(</span><span class="nb">in-ns </span><span class="ss">&#39;workin-hard</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line"><span class="p">(</span><span class="nf">patch</span> <span class="nv">nil</span><span class="p">)</span>
+</span><span class="line"><span class="c1">; =&gt; CompilerException java.lang.RuntimeException: Unable to resolve symbol: patch in this context, compiling:(NO_SOURCE_PATH:1:1)</span>
+</span><span class="line">
+</span><span class="line"><span class="c1">;; We can access the &quot;monkeypatched&quot; methods by using their namespace</span>
+</span><span class="line"><span class="p">(</span><span class="nf">monkeypatching/patch</span> <span class="s">&quot;a string&quot;</span><span class="p">)</span>
+</span><span class="line"><span class="c1">; =&gt; &quot;I&#39;m an awesome string!&quot;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h2 id="brining-it-together">Brining it together</h2>
+
+<p>Let’s add a <code>Triangle</code> type that support both <code>area</code> and <code>perimeter</code>.  We can even provide implementations for the protocols it
+participates in directly inside of <code>defrecord</code>:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+</pre></td><td class="code"><pre><code class="clojure"><span class="line"><span class="p">(</span><span class="kd">defrecord </span><span class="nv">Triangle</span> <span class="p">[</span><span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">]</span>
+</span><span class="line">  <span class="nv">Areable</span>
+</span><span class="line">  <span class="c1">;; The hardest part of solving the expression problem in Clojure is looking up highschool geometry</span>
+</span><span class="line">  <span class="c1">;; Heron&#39;s formula</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">area</span> <span class="p">[{</span><span class="ss">:keys</span> <span class="p">[</span><span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">]}]</span>
+</span><span class="line">    <span class="p">(</span><span class="k">let </span><span class="p">[</span><span class="nv">s</span> <span class="p">(</span><span class="nb">/ </span><span class="p">(</span><span class="nb">+ </span><span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">)</span> <span class="mi">2</span><span class="p">)]</span>
+</span><span class="line">       <span class="p">(</span><span class="nf">Math/sqrt</span> <span class="p">(</span><span class="nb">* </span><span class="nv">s</span> <span class="p">(</span><span class="nb">- </span><span class="nv">s</span> <span class="nv">a</span><span class="p">)</span> <span class="p">(</span><span class="nb">- </span><span class="nv">s</span> <span class="nv">b</span><span class="p">)</span> <span class="p">(</span><span class="nb">- </span><span class="nv">s</span> <span class="nv">c</span><span class="p">)))))</span>
+</span><span class="line">  <span class="nv">Perimeterable</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">perimeter</span> <span class="p">[{</span><span class="ss">:keys</span> <span class="p">[</span><span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">]}]</span> <span class="p">(</span><span class="nb">+ </span><span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">)))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h2 id="footnotes">Footnotes</h2>
+
+<div class="footnotes">
+  <ol>
+    <li id="fn:1">
+
+      <p>The <code>[{radius :radius}]</code> bit may be confusing. It’s using <a href="http://clojure.org/special_forms#Special%20Forms--Binding%20Forms%20%28Destructuring%29-Map%20binding%20destructuring">map destructuring</a> to bind the <code>:radius</code> field of the Circle record to the symbol <code>radius</code>.
+Without it, the function would look like this:</p>
+
+      <pre><code>(area [this]
+  (let [radius (:radius this)]
+    (* Math/PI radius radius)))
+</code></pre>
+      <p><a href="#fnref:1" class="reversefootnote">&#8617;</a></p>
+    </li>
+  </ol>
+</div>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+  
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/28/how-to-take-over-any-java-developer/">How to take over the computer of any Java (or Clojure or Scala) developer</a></h1>
+      
+      
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-28T14:12:48-04:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><strong>Update: 07/31/2014</strong></p>
+
+<p>Sonatype has reacted to this post and will soon be turning on SSL access for all users. Their blog post announcing this is <a href="http://blog.sonatype.com/2014/07/ssl_connectivity_for_central/">here</a>. I’m very happy that they are making this change, and the Java ecosystem is going to be more secure for it!</p>
+
+<p>That being said, if you’re reading this and are thinking of charging $10 to gauge the true demand for security features in your product, don’t. Imagine if car companies decided to charge $10 to gauge the true demand for air bags. Luckily, we live in a world where car companies can’t legally do that.</p>
+
+<p>I’m happy that Sonatype made this change in their policy, and I hope they continue to <em>decrease</em> friction for security features in their products. It’s our responsibility as developers to make the most secure product we can for our users. How much friction they are willing to endure for a security feature shouldn’t factor into it. </p>
+
+<hr />
+
+<p>The other day I started hacking on a Clojure project of mine, when I saw my firewall display this:</p>
+
+<p><img src="/assets/images/dilettante/firewall.png" width="500" /></p>
+
+<p>I’m downloading clojure.jar from <a href="http://repo.maven.apache.org">http//repo.maven.apache.org</a> over port 80! This means that I’m going to be downloading JARs over unencrypted http. I thought this was an <a href="https://github.com/technomancy/leiningen/issues/1604">issue</a> with <a href="http://leiningen.org/">leiningen</a> at first. As it turns out it’s not lein’s fault at all. Clojure.jar, and a whole lot of other JARs that are important in the Java/Clojure/Scala/etc world are officially hosted on <a href="http://search.maven.org/">Maven Central</a>, which is a public service provided by <a href="http://www.sonatype.com/">Sonatype</a>. Sonatype has a policy that they only allow SSL access to people who have authentication tokens. <strong>In order to get an authentication token and SSL access, you need to donate $10 to the Apache foundation.</strong> If you don’t believe me, the donate page is <a href="http://www.sonatype.com/clm/secure-access-to-central">here</a>, and the blog post announcing this policy is <a href="http://www.sonatype.com/clm/secure-access-to-central">here</a>. They even mention man-in-the-middle attacks on it.</p>
+
+<p>Because authentication tokens are issued per user/organization, tools like maven and leiningen can’t bundle authentication tokens. If you’re pulling down some Java project and installing its dependencies, you’re not going over SSL. This policy was confirmed by a Sonatype employee when I got into a twitter tiff about this:</p>
+
+<p><img src="/assets/images/dilettante/tweet.png" width="500" /></p>
+
+<p>Unless you take very careful steps that involve paying someone $10, JARs you download can be man-in-the-middled, and code you execute on your system can be replaced by malware.</p>
+
+<p>When can this happen? If you ever use a public wifi network in a coffee shop, or are on a wifi network that someone <a href="https://ettercap.github.io/ettercap/">took over</a> you can be man-in-the-middled. Your ISP can man-in-the-middle you at will, and some do so in order to serve you ads. Or, perhaps you are subject to a man-in-the-middle attack from a <a href="http://www.renesys.com/2013/11/mitm-internet-hijacking/">state actor</a>.</p>
+
+<h2 id="dilettante">Dilettante</h2>
+
+<p>To prove how easy this is to do, I wrote <a href="https://github.com/mveytsman/dilettante">dilettante</a>, a man-in-the-middle proxy that intercepts JARs from maven central and injects malicious code into them.</p>
+
+<p>Proxying HTTP traffic through dilettante will backdoor any JARs downloaded from maven central. The backdoored version will retain their functionality, but display a nice message to the user when they use the library. You can see the video below:</p>
+
+<video width="" height="" preload="none" controls="" poster=""><source src="http://blog.ontoillogical.com/assets/files/dilettante_screencast.mp4" type="video/mp4; codecs=&quot;avc1.42E01E, mp4a.40.2&quot;" /></video>
+
+<p>Or a screenshot:</p>
+
+<p><img src="/assets/images/dilettante/screen.png" width="800" /></p>
+
+<p>You can find the code <a href="https://github.com/mveytsman/dilettante">here</a></p>
+
+<h2 id="the-technical-details">The Technical Details</h2>
+
+<p>When JARs are downloaded from Maven Central, they go over HTTP, so a man in the middle proxy can replace them at will. It’s possible to sign jars, but in my experimentation with standard tools, these signatures aren’t checked. The only other verification is a SHA1 sum, which is also sent over HTTP. When dilettante sees a JAR coming from Maven Central it replaces the original JAR with a backdoored version that runs malicious code on the victim’s computer. Since the SHA1 hashes are sent over HTTP only, dilettante simply replaces any hashes it sees with the hash of the corresponding backdoored JAR.</p>
+
+<p>I used the excellent <a href="http://mitmproxy.org/">mitmproxy</a> library to build my tool. I started by writing an <a href="http://mitmproxy.org/doc/scripting/inlinescripts.html">inline script</a> for the proxy and then moved on to creating a standalone tool with <a href="http://mitmproxy.org/doc/scripting/libmproxy.html">libmproxy</a>.</p>
+
+<p>A JAR is just a zip file that contains Java Class files, resources and some metadata. To backdoor a JAR, I can insert my own class by adding it to the zip archive:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="kn">package</span> <span class="n">dilettante</span><span class="o">;</span>
+</span><span class="line">
+</span><span class="line"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Dilettante</span> <span class="o">{</span>
+</span><span class="line">    <span class="kd">public</span> <span class="kd">static</span> <span class="nf">void</span><span class="o">()</span> <span class="o">{</span>
+</span><span class="line">        <span class="c1">// do some evil stuff</span>
+</span><span class="line">    <span class="o">}</span>
+</span><span class="line"><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>The trick is finding a way to call my malicious class. I know that my victim will be downloading some library, and I need to run my malicious code regardless of what classes in the library they actually use. I would also like to actual functionality of the library to not be affected.</p>
+
+<p>Java has the concept of static class blocks, which are class level initializers — that is, they contain code that is run once when the class (not an instance!) is loaded into memory. After I insert a malicious class file into the jar, I can call it in a static block like this:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="kn">import</span> <span class="nn">dilettante.*</span><span class="o">;</span>
+</span><span class="line"><span class="kd">static</span> <span class="o">{</span>
+</span><span class="line">    <span class="n">Dilettante</span><span class="o">.</span><span class="na">backdoor</span><span class="o">();</span>
+</span><span class="line"><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>In order to inject the above snippet, I need to inject it into Java classes directly, not source files. I use <a href="https://github.com/Storyyeller/Krakatau">Krakatau</a>, a Java disassembler/assembler library for Python. It let’s me add the snippet in <a href="http://jasmin.sourceforge.net/">Jasmin</a> format:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="o">.</span><span class="na">method</span> <span class="kd">static</span> <span class="o">&lt;</span><span class="n">clinit</span><span class="o">&gt;</span> <span class="o">:</span> <span class="o">()</span><span class="n">V</span>
+</span><span class="line">  <span class="o">;</span> <span class="n">method</span> <span class="n">code</span> <span class="nl">size:</span> <span class="mi">4</span> <span class="n">bytes</span>
+</span><span class="line">  <span class="o">.</span><span class="na">limit</span> <span class="n">stack</span> <span class="mi">0</span>
+</span><span class="line">  <span class="o">.</span><span class="na">limit</span> <span class="n">locals</span> <span class="mi">0</span>
+</span><span class="line">  <span class="n">invokestatic</span> <span class="n">dilettante</span><span class="o">/</span><span class="n">Dilettante</span> <span class="nf">backdoor</span> <span class="o">()</span><span class="n">V</span>
+</span><span class="line">  <span class="k">return</span>
+</span><span class="line"><span class="o">.</span><span class="na">end</span> <span class="n">method</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h2 id="limitations">Limitations</h2>
+<p>This is a proof of concept!, and so it still has some limitations</p>
+
+<ol>
+  <li>
+    <p>Currently it’s not very fast. There are a couple of reasons for this</p>
+
+    <ul>
+      <li>I have to run a disassemble and an assemble step. It would be more efficient to directly append the assembled shim to the .class file.</li>
+      <li>The way I am using Python’s zipfile library, I’m actually creating a second copy of every class in the zip. This is inefficient in terms of space and speed. Careful reading of the zip spec may lead to an efficient way of appending data to files inside a zip.</li>
+    </ul>
+  </li>
+  <li>
+    <p>If a user is downloading multiple JARs in one go, we will backdoor each one. The malicious payload is executed only once per JAR, but if multiple JARs are backdoored, we will execute it several times. This issue will disappear if we replace the cat picture with a high quality persistent backdoor that is smart enough to only infect a system once :).</p>
+  </li>
+</ol>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+  
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/21/delimited-continuations-in-ruby-part-2/">Delimited Continuations in Ruby Part 2: Generators and Coroutines</a></h1>
+      
+      
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-21T03:00:00-04:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Last <a href="http://blog.ontoillogical.com/blog/2014/07/12/delimited-continuations-in-ruby/">time</a>, I showed some basic things you can do with delimited continuations. If you’re still confused about them (as I am!) another good tutorial is <a href="http://community.schemewiki.org/?composable-continuations-tutorial">here</a>.</p>
+
+<p>Let’s dive right in and build some more complicated control structures!</p>
+
+<h2 id="generators">Generators</h2>
+
+<p>Let’s start by building what Python calls “Generators.” Ruby has Enumerators, which are pretty similar, but I’ll call it a generator in order to differentiate my implementation from the Ruby core.</p>
+
+<p>Here’s the code I want to write
+&lt;div class=&#8217;bogus-wrapper&#8217;&gt;<notextile><figure class="code">&lt;figcaption&gt;<span></span>&lt;/figcaption&gt;&lt;div class=&#8221;highlight&#8221;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#8221;gutter&#8221;&gt;&lt;pre class=&#8221;line-numbers&#8221;&gt;<span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#8217;code&#8217;&gt;&lt;pre&gt;<code class="ruby"><span class="line"><span class="n">counter</span> <span class="o">=</span> <span class="no">Generator</span><span class="o">.</span><span class="n">new</span> <span class="k">do</span> <span class="o">|</span><span class="n">g</span><span class="o">|</span>
+</span><span class="line">  <span class="n">ctr</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span class="line">  <span class="k">while</span> <span class="kp">true</span>
+</span><span class="line">    <span class="n">g</span><span class="o">.</span><span class="n">yield</span><span class="p">(</span><span class="n">ctr</span><span class="p">)</span>
+</span><span class="line">    <span class="n">ctr</span> <span class="o">+=</span> <span class="mi">1</span>
+</span><span class="line">  <span class="k">end</span>
+</span><span class="line"><span class="k">end</span>
+</span></code>&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</figure></notextile>&lt;/div&gt;
+Then I use it like so</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</pre></td><td class="code"><pre><code class="ruby"><span class="line"><span class="n">counter</span><span class="o">.</span><span class="n">next</span>
+</span><span class="line"><span class="c1"># =&gt; 0</span>
+</span><span class="line"><span class="n">counter</span><span class="o">.</span><span class="n">next</span>
+</span><span class="line"><span class="c1"># =&gt; 1</span>
+</span><span class="line"><span class="n">counter</span><span class="o">.</span><span class="n">next</span>
+</span><span class="line"><span class="c1"># =&gt; 2</span>
+</span><span class="line"><span class="c1"># ...</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Using delimited continuations to build a generator is pretty straight-forward. Our constructor will get a block and surround it with a <code>prompt</code> to delimit a continuation. Yielding adds the yielded value into an internal queue, and uses <code>control</code> to capture a continuation. When we call that continuation, we will execute the code around the control, which is precisely like entering at where we called yield. Getting the next value of our generator pops a result off the queue and invokes the saved continuation.</p>
+
+<p>The annotated code is below.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+<span class="line-number">31</span>
+<span class="line-number">32</span>
+<span class="line-number">33</span>
+<span class="line-number">34</span>
+</pre></td><td class="code"><pre><code class="ruby"><span class="line"><span class="k">class</span> <span class="nc">Generator</span>
+</span><span class="line">  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+</span><span class="line">    <span class="c1"># @results will be used to save values yielded by our generator</span>
+</span><span class="line">    <span class="vi">@results</span> <span class="o">=</span> <span class="o">[]</span>
+</span><span class="line">    <span class="c1"># Calling the block is wrapped in a prompt in order to enclose it in a continuation</span>
+</span><span class="line">    <span class="no">DelimR</span><span class="o">.</span><span class="n">prompt</span> <span class="k">do</span>
+</span><span class="line">      <span class="c1"># The block is passed self, so that it can call the yield method defined below</span>
+</span><span class="line">      <span class="n">block</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="nb">self</span><span class="p">)</span>
+</span><span class="line">    <span class="k">end</span>
+</span><span class="line">  <span class="k">end</span>
+</span><span class="line">
+</span><span class="line">  <span class="k">def</span> <span class="nf">yield</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</span><span class="line">    <span class="c1"># The yield method saves the result it receives, and saves the continuation in @next</span>
+</span><span class="line">    <span class="vi">@results</span> <span class="o">&lt;&lt;</span> <span class="n">result</span>
+</span><span class="line">    <span class="no">DelimR</span><span class="o">.</span><span class="n">control</span> <span class="k">do</span> <span class="o">|</span><span class="n">k</span><span class="o">|</span>
+</span><span class="line">      <span class="vi">@next</span> <span class="o">=</span> <span class="n">k</span>
+</span><span class="line">    <span class="k">end</span>
+</span><span class="line">  <span class="k">end</span>
+</span><span class="line">  <span class="k">def</span> <span class="nf">next</span>
+</span><span class="line">    <span class="c1"># @result is used as a FIFO queue of yielded values</span>
+</span><span class="line">    <span class="n">r</span> <span class="o">=</span> <span class="vi">@results</span><span class="o">.</span><span class="n">shift</span>
+</span><span class="line">
+</span><span class="line">    <span class="c1"># an empty @results means that no more values have been yielded</span>
+</span><span class="line">    <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">nil?</span>
+</span><span class="line">      <span class="k">raise</span> <span class="s2">&quot;Iterator finished&quot;</span>
+</span><span class="line">    <span class="k">end</span>
+</span><span class="line">
+</span><span class="line">    <span class="c1"># This invokes the saved continuation, not passing it any values</span>
+</span><span class="line">    <span class="vi">@next</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="kp">nil</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line">    <span class="c1"># return the saved @result that was shifted off the bottom of the queue</span>
+</span><span class="line">    <span class="n">r</span>
+</span><span class="line">  <span class="k">end</span>
+</span><span class="line"><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h2 id="coroutines">Coroutines</h2>
+
+<p>Coroutines, also known as Fibers in ruby-land, are subroutines that can suspend their execution, to be resumed at a later point. They are very useful as a lightweight thread-like construct. They are very similar to generators, and can actually be implemented in terms of <a href="http://legacy.python.org/dev/peps/pep-0342/">them</a>. Besides being useful for asynchronous tasks, <a href="http://eli.thegreenplace.net/2009/08/29/co-routines-as-an-alternative-to-state-machines/">“Co-routines are to state machines what recursion is to stacks”</a>. </p>
+
+<p>We can can modify our <code>Generator</code> class to be a coroutine by renaming <code>next</code> to <code>send</code> and allowing data to be passed into it, so <code>foo = c.yield</code> will alssign whatever is sent to the coroutine to <code>foo</code> when execution resumes.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+</pre></td><td class="code"><pre><code class="ruby"><span class="line"><span class="k">class</span> <span class="nc">Coroutine</span>
+</span><span class="line">  <span class="c1"># initialize and yield are the same as for Generator</span>
+</span><span class="line">  <span class="k">def</span> <span class="nf">send</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="kp">nil</span><span class="p">)</span>
+</span><span class="line">    <span class="c1"># @result is used as a FIFO queue of yielded values</span>
+</span><span class="line">    <span class="n">r</span> <span class="o">=</span> <span class="vi">@results</span><span class="o">.</span><span class="n">shift</span>
+</span><span class="line">
+</span><span class="line">    <span class="c1"># an empty @results means that no more values have been yielded</span>
+</span><span class="line">    <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">nil?</span>
+</span><span class="line">      <span class="k">raise</span> <span class="s2">&quot;Iterator finished&quot;</span>
+</span><span class="line">    <span class="k">end</span>
+</span><span class="line">
+</span><span class="line">    <span class="c1"># This invokes the saved continuation, not passing it any values</span>
+</span><span class="line">    <span class="vi">@next</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line">    <span class="c1"># return the saved @result that was shifted off the bottom of the queue</span>
+</span><span class="line">    <span class="n">r</span>
+</span><span class="line">  <span class="k">end</span>
+</span><span class="line"><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Here’s an implementation of the parsing example from Eli Bendersky’s blog <a href="http://eli.thegreenplace.net/2009/08/29/co-routines-as-an-alternative-to-state-machines/">post</a> using the Coroutine class defined above.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+<span class="line-number">31</span>
+<span class="line-number">32</span>
+<span class="line-number">33</span>
+<span class="line-number">34</span>
+<span class="line-number">35</span>
+<span class="line-number">36</span>
+<span class="line-number">37</span>
+<span class="line-number">38</span>
+<span class="line-number">39</span>
+<span class="line-number">40</span>
+<span class="line-number">41</span>
+<span class="line-number">42</span>
+<span class="line-number">43</span>
+<span class="line-number">44</span>
+<span class="line-number">45</span>
+<span class="line-number">46</span>
+<span class="line-number">47</span>
+<span class="line-number">48</span>
+<span class="line-number">49</span>
+<span class="line-number">50</span>
+<span class="line-number">51</span>
+<span class="line-number">52</span>
+<span class="line-number">53</span>
+<span class="line-number">54</span>
+<span class="line-number">55</span>
+<span class="line-number">56</span>
+<span class="line-number">57</span>
+<span class="line-number">58</span>
+<span class="line-number">59</span>
+<span class="line-number">60</span>
+<span class="line-number">61</span>
+<span class="line-number">62</span>
+<span class="line-number">63</span>
+</pre></td><td class="code"><pre><code class="ruby"><span class="line"><span class="k">def</span> <span class="nf">hex_encode</span><span class="p">(</span><span class="n">str</span><span class="p">)</span>
+</span><span class="line">  <span class="n">str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sr">//</span><span class="p">)</span><span class="o">.</span><span class="n">map</span><span class="p">{</span> <span class="o">|</span><span class="n">x</span><span class="o">|</span> <span class="n">x</span><span class="o">.</span><span class="n">ord</span><span class="o">.</span><span class="n">to_s</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span> <span class="p">}</span><span class="o">.</span><span class="n">join</span>
+</span><span class="line"><span class="k">end</span>
+</span><span class="line">
+</span><span class="line"><span class="n">frame_receiver</span> <span class="o">=</span> <span class="no">Coroutine</span><span class="o">.</span><span class="n">new</span> <span class="k">do</span> <span class="o">|</span><span class="n">c</span><span class="o">|</span>
+</span><span class="line">  <span class="k">while</span> <span class="kp">true</span>
+</span><span class="line">    <span class="n">frame</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">yield</span><span class="p">(</span><span class="kp">true</span><span class="p">))</span>
+</span><span class="line">    <span class="nb">puts</span> <span class="s1">&#39;Got frame:&#39;</span><span class="p">,</span> <span class="n">hex_encode</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+</span><span class="line">  <span class="k">end</span>
+</span><span class="line"><span class="k">end</span>
+</span><span class="line">
+</span><span class="line"><span class="n">unwrap_protocol</span> <span class="o">=</span> <span class="no">Coroutine</span><span class="o">.</span><span class="n">new</span> <span class="k">do</span> <span class="o">|</span><span class="n">c</span><span class="o">|</span>
+</span><span class="line">  <span class="n">header</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\x61</span><span class="s2">&quot;</span>
+</span><span class="line">  <span class="n">footer</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\x62</span><span class="s2">&quot;</span>
+</span><span class="line">  <span class="n">dle</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\xAB</span><span class="s2">&quot;</span>
+</span><span class="line">  <span class="n">after_dle_func</span> <span class="o">=</span> <span class="nb">lambda</span> <span class="p">{</span> <span class="o">|</span><span class="n">x</span><span class="o">|</span> <span class="n">x</span> <span class="p">}</span>
+</span><span class="line">  <span class="n">target</span> <span class="o">=</span> <span class="n">frame_receiver</span>
+</span><span class="line">  <span class="c1"># Outer loop looking for a frame header</span>
+</span><span class="line">  <span class="c1">#</span>
+</span><span class="line">  <span class="k">while</span> <span class="kp">true</span>
+</span><span class="line">    <span class="n">byte</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">yield</span><span class="p">(</span><span class="kp">true</span><span class="p">))</span>
+</span><span class="line">    <span class="n">frame</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+</span><span class="line">
+</span><span class="line">    <span class="k">if</span> <span class="n">byte</span> <span class="o">==</span> <span class="n">header</span>
+</span><span class="line">      <span class="c1"># Capture the full frame</span>
+</span><span class="line">      <span class="c1">#</span>
+</span><span class="line">      <span class="k">while</span> <span class="kp">true</span>
+</span><span class="line">
+</span><span class="line">        <span class="n">byte</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">yield</span><span class="p">(</span><span class="kp">true</span><span class="p">))</span>
+</span><span class="line">
+</span><span class="line">        <span class="k">if</span> <span class="n">byte</span> <span class="o">==</span> <span class="n">footer</span>
+</span><span class="line">
+</span><span class="line">          <span class="n">target</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+</span><span class="line">          <span class="k">break</span>
+</span><span class="line">        <span class="k">elsif</span> <span class="n">byte</span> <span class="o">==</span> <span class="n">dle</span>
+</span><span class="line">          <span class="n">byte</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">yield</span><span class="p">(</span><span class="kp">true</span><span class="p">))</span>
+</span><span class="line">          <span class="n">frame</span> <span class="o">+=</span> <span class="n">after_dle_func</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">byte</span><span class="p">)</span>
+</span><span class="line">        <span class="k">else</span>
+</span><span class="line">          <span class="n">frame</span> <span class="o">+=</span> <span class="n">byte</span>
+</span><span class="line">        <span class="k">end</span>
+</span><span class="line">      <span class="k">end</span>
+</span><span class="line">    <span class="k">end</span>
+</span><span class="line">  <span class="k">end</span>
+</span><span class="line"><span class="k">end</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line">
+</span><span class="line"><span class="n">bytes</span> <span class="o">=</span> <span class="o">[</span><span class="mh">0x70</span><span class="p">,</span> <span class="mh">0x24</span><span class="p">,</span>
+</span><span class="line">         <span class="mh">0x61</span><span class="p">,</span> <span class="mh">0x99</span><span class="p">,</span> <span class="mh">0xAF</span><span class="p">,</span> <span class="mh">0xD1</span><span class="p">,</span> <span class="mh">0x62</span><span class="p">,</span>
+</span><span class="line">         <span class="mh">0x56</span><span class="p">,</span> <span class="mh">0x62</span><span class="p">,</span>
+</span><span class="line">         <span class="mh">0x61</span><span class="p">,</span> <span class="mh">0xAB</span><span class="p">,</span> <span class="mh">0xAB</span><span class="p">,</span> <span class="mh">0x14</span><span class="p">,</span> <span class="mh">0x62</span><span class="p">,</span>
+</span><span class="line">         <span class="mh">0x7</span>
+</span><span class="line">        <span class="o">].</span><span class="n">map</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:chr</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line"><span class="n">bytes</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">byte</span><span class="o">|</span>
+</span><span class="line">  <span class="n">unwrap_protocol</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">byte</span><span class="p">)</span>
+</span><span class="line"><span class="k">end</span>
+</span><span class="line">
+</span><span class="line"><span class="c1"># Got frame:</span>
+</span><span class="line"><span class="c1"># 99afd1</span>
+</span><span class="line"><span class="c1"># Got frame:</span>
+</span><span class="line"><span class="c1"># ab14</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h2 id="final-thoughts">Final thoughts</h2>
+
+<p>Once I had prompt/control, I found implementing generators and coroutines pretty straightforward. I think that prompt/control are easier to reason about then non-delimited continuations. One piece of evidence that I have for this is that Ruby’s <a href="https://github.com/ruby/ruby/blob/ruby_1_8_7/lib/generator.rb">implementation</a> of generators using non-delimited continuations is harder (for me) to understand then the one above using delimited continuations.</p>
+
+<p>Either way, having an abstraction that allows you to implement new control structures is really cool and empowering. For instance, this <a href="http://www.ccs.neu.edu/racket/pubs/pldi93-sitaram.pdf">paper</a> uses delimited continuations to implement Prolog-like backtracking!</p>
+
+<p>There are still many things I don’t understand about continuations, a partial list is below</p>
+
+<ol>
+  <li>There is a difference between prompt/control and reset/shift. I don’t know what it is.</li>
+  <li>I don’t entirely understand what <code>@@keep_delimiter_upon_effect</code> does in https://github.com/mveytsman/DelimR/blob/master/lib/delimr.rb</li>
+  <li>In the generator example, why doesn’t the line <code>ctr=0</code> get executed on every iteration?</li>
+  <li>I actually implemented semi-coroutines. For full coroutines I need to be able to transfer exeution between them. My instricnt is that I can do this by calling resume on the target coroutine, but seeing this in the Ruby Fiber documentation makes me think there is something non-trivial I don’t understand here:
+&gt; You cannot resume a fiber that transferred control to another one. This will cause a double resume error. You need to transfer control back to this fiber before it can yield and resume.</li>
+</ol>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+  
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/12/delimited-continuations-in-ruby/">Delimited Continuations in Ruby Part 1</a></h1>
+      
+      
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-12T09:30:00-04:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>For the past few days at Hacker School, I’ve been exploring continuations. Continuations are hard to describe. Basically, a continuation represents the execution state of a program at a point. Capturing the continuation and invoking it later allows you to come back to that point in the programs execution. Continuations can be used to implement complicated control flow constructs.</p>
+
+<p>If that was complicated, here’s a sandwich metaphor from <a href="https://groups.google.com/forum/#!msg/perl.perl6.language/-KFNPaLL2yE/_RzO8Fenz7AJ">Luke Palmer</a>:</p>
+
+<blockquote>
+  <p>Say you’re in the kitchen in front of the refrigerator, thinking about a sandwich. You take a continuation right there and stick it in your pocket. Then you get some turkey and bread out of the refrigerator and make yourself a sandwich, which is now sitting on the counter. You invoke the continuation in your pocket, and you find yourself standing in front of the refrigerator again, thinking about a sandwich. But fortunately, there’s a sandwich on the counter, and all the materials used to make it are gone. So you eat it. :-)</p>
+</blockquote>
+
+<p>Another way to put it: a captured continuation is a label, and to invoke it is to GOTO.</p>
+
+<h2 id="the-basics">The Basics</h2>
+
+<p>On that note, let’s start by building a simple GOTO.</p>
+
+<p>In Ruby, you need to <code>require 'continuation'</code> to enable continuations. <code>callcc</code> takes a block, and passes it the current continuation as parameter. That continuation can be invoked later.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+</pre></td><td class="code"><pre><code class="ruby"><span class="line"><span class="nb">require</span> <span class="s1">&#39;continuation&#39;</span>
+</span><span class="line"><span class="vg">$labels</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span class="line">
+</span><span class="line"><span class="k">def</span> <span class="nf">label</span><span class="p">(</span><span class="n">label_name</span><span class="p">)</span>
+</span><span class="line">  <span class="nb">callcc</span> <span class="p">{</span> <span class="o">|</span><span class="n">continuation</span><span class="o">|</span>   <span class="vg">$labels</span><span class="o">[</span><span class="n">label_name</span><span class="o">]</span> <span class="o">=</span> <span class="n">continuation</span> <span class="p">}</span>
+</span><span class="line"><span class="k">end</span>
+</span><span class="line">
+</span><span class="line"><span class="k">def</span> <span class="nf">goto</span><span class="p">(</span><span class="n">label_name</span><span class="p">)</span>
+</span><span class="line">  <span class="k">unless</span> <span class="vg">$labels</span><span class="o">.</span><span class="n">has_key?</span> <span class="n">label_name</span>
+</span><span class="line">    <span class="k">raise</span> <span class="s2">&quot;No label </span><span class="si">#{</span><span class="n">label_name</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class="line">  <span class="k">end</span>
+</span><span class="line">  <span class="vg">$labels</span><span class="o">[</span><span class="n">label_name</span><span class="o">].</span><span class="n">call</span>
+</span><span class="line"><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>We can then build a for loop</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</pre></td><td class="code"><pre><code class="ruby"><span class="line"><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+</span><span class="line"><span class="nb">puts</span> <span class="s2">&quot;entering loop&quot;</span>
+</span><span class="line"><span class="n">label</span> <span class="s2">&quot;loop&quot;</span>
+</span><span class="line"><span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">10</span>
+</span><span class="line">  <span class="nb">puts</span> <span class="n">i</span>
+</span><span class="line">  <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+</span><span class="line">  <span class="n">goto</span> <span class="s2">&quot;loop&quot;</span>
+</span><span class="line"><span class="k">end</span>
+</span><span class="line"><span class="nb">puts</span> <span class="s2">&quot;loop done&quot;</span>
+</span><span class="line"><span class="nb">puts</span> <span class="s2">&quot;i is </span><span class="si">#{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>We can even build a reverse GOTO (known as the COMEFROM, implementation courtesy of <a href="https://en.wikipedia.org/wiki/COMEFROM#Practical_uses">Wikipedia</a>).</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+</pre></td><td class="code"><pre><code class="ruby"><span class="line"><span class="vg">$come_from_labels</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span class="line">
+</span><span class="line"><span class="k">def</span> <span class="nf">label</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+</span><span class="line">    <span class="k">if</span> <span class="vg">$come_from_labels</span><span class="o">[</span><span class="n">l</span><span class="o">]</span>
+</span><span class="line">        <span class="vg">$come_from_labels</span><span class="o">[</span><span class="n">l</span><span class="o">].</span><span class="n">call</span>
+</span><span class="line">    <span class="k">end</span>
+</span><span class="line"><span class="k">end</span>
+</span><span class="line">
+</span><span class="line"><span class="k">def</span> <span class="nf">come_from</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+</span><span class="line">    <span class="nb">callcc</span> <span class="k">do</span> <span class="o">|</span><span class="n">block</span><span class="o">|</span>
+</span><span class="line">        <span class="vg">$come_from_labels</span><span class="o">[</span><span class="n">l</span><span class="o">]</span> <span class="o">=</span> <span class="n">block</span>
+</span><span class="line">    <span class="k">end</span>
+</span><span class="line"><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h2 id="problems-abound">Problems Abound</h2>
+
+<p>You can implement pretty much any control flow you want with continuations, but it may be <a href="http://okmij.org/ftp/continuations/against-callcc.html#traps">hairy</a>.</p>
+
+<p>To give an example of the kind of problems you face when working with traditional continuations, here’s a bug I ran into when writing the GOTO example above. My orginal code for <code>label</code> looked like this: </p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class="ruby"><span class="line"><span class="k">def</span> <span class="nf">label</span><span class="p">(</span><span class="n">label_name</span><span class="p">)</span>
+</span><span class="line">   <span class="vg">$labels</span><span class="o">[</span><span class="n">label_name</span><span class="o">]</span> <span class="o">=</span> <span class="nb">callcc</span> <span class="p">{</span> <span class="o">|</span><span class="n">continuation</span><span class="o">|</span> <span class="n">continuation</span> <span class="p">}</span>
+</span><span class="line"><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Running it, I got the following output:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</pre></td><td class="code"><pre><code class="ruby"><span class="line"><span class="n">entering</span> <span class="kp">loop</span>
+</span><span class="line"><span class="mi">1</span>
+</span><span class="line"><span class="mi">2</span>
+</span><span class="line"><span class="n">goto</span><span class="o">.</span><span class="n">rb</span><span class="p">:</span><span class="mi">15</span><span class="ss">:in</span> <span class="sb">`goto&#39;: undefined method `</span><span class="n">call</span><span class="s1">&#39; for nil:NilClass (NoMethodError)</span>
+</span><span class="line"><span class="s1">	from goto.rb:27:in `&lt;main&gt;&#39;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Can you guess the issue? When <code>goto</code> was called, it returned to the place where <code>callcc</code> was called. That means that whatever was passed to the continuation would now be assigned to <code>$labels[label_name]</code>. We didn’t pass anything to the continuation, and so <code>$labels[label_name]</code> becomes <code>nil</code>.</p>
+
+<p>To further illustrate the point:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</pre></td><td class="code"><pre><code class="ruby"><span class="line"><span class="vg">$continuation</span> <span class="o">=</span> <span class="nb">callcc</span> <span class="p">{</span> <span class="o">|</span><span class="n">continuation</span><span class="o">|</span> <span class="n">continuation</span> <span class="p">}</span>
+</span><span class="line"><span class="nb">puts</span> <span class="s2">&quot;$continuation is </span><span class="si">#{</span><span class="vg">$continuation</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class="line"><span class="c1"># &quot;$continuation is #&lt;Continuation:0x007fbbaa0193f8&gt;&quot;</span>
+</span><span class="line"><span class="vg">$continuation</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="s2">&quot;hello world&quot;</span><span class="p">)</span>
+</span><span class="line"><span class="nb">puts</span> <span class="s2">&quot;$continuation is </span><span class="si">#{</span><span class="vg">$continuation</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class="line"><span class="c1"># &quot;$continuation is hello world&quot;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>It seems like it would be convent to separate the concept of shifting control from the place we want to return to.</p>
+
+<h2 id="enter-delmited-continuations">Enter delmited continuations</h2>
+
+<p><a href="https://en.wikipedia.org/wiki/Delimited_continuation">Delimited continuations</a> are way of capturing a fixed slice of computation instead of the unlimited computation captured by a regular continuation.</p>
+
+<p>I wrote a little library called <a href="https://github.com/mveytsman/delimr">DelimR</a> that implemnts delimited continuations for ruby by using the native <code>callcc</code> construct. I made a direct port of Oleg Kiselyov’s scheme <a href="http://okmij.org/ftp/continuations/implementations.html#delimcc-scheme">implementation</a>. In an inversion of Knuth’s famous <a href="http://staff.science.uva.nl/~peter/knuthnote.pdf">line</a>, the code seems to work, but I don’t understand it.</p>
+
+<p>Delimited continuations have two operations. <code>prompt</code> marks a continuation, when the continuation is invoked, it will return to where prompt was called. <code>control</code> allows us to capture the continuation.</p>
+
+<p>It’s best to demonstrate this with some examples. <code>prompt</code> on it’s own is a no-op.
+&lt;div class=&#8217;bogus-wrapper&#8217;&gt;<notextile><figure class="code">&lt;figcaption&gt;<span></span>&lt;/figcaption&gt;&lt;div class=&#8221;highlight&#8221;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#8221;gutter&#8221;&gt;&lt;pre class=&#8221;line-numbers&#8221;&gt;<span class="line-number">1</span>
+<span class="line-number">2</span>
+&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#8217;code&#8217;&gt;&lt;pre&gt;<code class="ruby"><span class="line"><span class="no">DelimR</span><span class="o">.</span><span class="n">prompt</span> <span class="p">{</span> <span class="mi">123</span> <span class="p">}</span>
+</span><span class="line"><span class="c1"># =&gt; 123</span>
+</span></code>&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</figure></notextile>&lt;/div&gt;
+Inside of <code>prompt</code>, you can call <code>control</code>, and pass it a block that receives a continuation as an argument
+&lt;div class=&#8217;bogus-wrapper&#8217;&gt;<notextile><figure class="code">&lt;figcaption&gt;<span></span>&lt;/figcaption&gt;&lt;div class=&#8221;highlight&#8221;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#8221;gutter&#8221;&gt;&lt;pre class=&#8221;line-numbers&#8221;&gt;<span class="line-number">1</span>
+<span class="line-number">2</span>
+&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#8217;code&#8217;&gt;&lt;pre&gt;<code class="ruby"><span class="line"><span class="no">DelimR</span><span class="o">.</span><span class="n">prompt</span> <span class="p">{</span> <span class="mi">1</span> <span class="o">+</span> <span class="no">DelimR</span><span class="o">.</span><span class="n">control</span> <span class="p">{</span> <span class="o">|</span><span class="n">k</span><span class="o">|</span> <span class="n">k</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="p">}}</span>
+</span><span class="line"><span class="c1"># =&gt; 3</span>
+</span></code>&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</figure></notextile>&lt;/div&gt;
+<code>k</code> captures the computation that surrounds <code>control</code> inside of <code>prompt</code>. If we don’t call <code>k</code>, that computation is lost
+&lt;div class=&#8217;bogus-wrapper&#8217;&gt;<notextile><figure class="code">&lt;figcaption&gt;<span></span>&lt;/figcaption&gt;&lt;div class=&#8221;highlight&#8221;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#8221;gutter&#8221;&gt;&lt;pre class=&#8221;line-numbers&#8221;&gt;<span class="line-number">1</span>
+<span class="line-number">2</span>
+&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#8217;code&#8217;&gt;&lt;pre&gt;<code class="ruby"><span class="line"><span class="no">DelimR</span><span class="o">.</span><span class="n">prompt</span> <span class="p">{</span> <span class="mi">1</span> <span class="o">+</span> <span class="no">DelimR</span><span class="o">.</span><span class="n">control</span> <span class="p">{</span> <span class="o">|</span><span class="n">k</span><span class="o">|</span> <span class="mi">2</span> <span class="p">}}</span>
+</span><span class="line"><span class="c1"># =&gt; 2</span>
+</span></code>&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</figure></notextile>&lt;/div&gt;
+And finally, the most exciting part,
+&lt;div class=&#8217;bogus-wrapper&#8217;&gt;<notextile><figure class="code">&lt;figcaption&gt;<span></span>&lt;/figcaption&gt;&lt;div class=&#8221;highlight&#8221;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#8221;gutter&#8221;&gt;&lt;pre class=&#8221;line-numbers&#8221;&gt;<span class="line-number">1</span>
+<span class="line-number">2</span>
+&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#8217;code&#8217;&gt;&lt;pre&gt;<code class="ruby"><span class="line"><span class="no">DelimR</span><span class="o">.</span><span class="n">prompt</span> <span class="p">{</span> <span class="mi">1</span> <span class="o">+</span> <span class="no">DelimR</span><span class="o">.</span><span class="n">control</span> <span class="p">{</span> <span class="o">|</span><span class="n">k</span><span class="o">|</span> <span class="n">k</span><span class="o">.</span><span class="n">class</span> <span class="p">}}</span>
+</span><span class="line"><span class="c1"># =&gt; Proc</span>
+</span></code>&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</figure></notextile>&lt;/div&gt;
+This is really cool! In delimited continuations, <code>k</code> is a <code>Proc</code>, which is Ruby-speak for a function. Delimited continuations are also called composable continuations, because you can <em>compose</em> <code>k</code> like any other function.</p>
+
+<p>Here’s an example:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="ruby"><span class="line"><span class="no">DelimR</span><span class="o">.</span><span class="n">prompt</span> <span class="p">{</span> <span class="mi">1</span> <span class="o">+</span> <span class="no">DelimR</span><span class="o">.</span><span class="n">control</span> <span class="p">{</span> <span class="o">|</span><span class="n">k</span><span class="o">|</span> <span class="n">k</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">k</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">k</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="mi">2</span><span class="p">)))</span> <span class="p">}</span> <span class="o">+</span> <span class="mi">7</span> <span class="p">}</span>
+</span><span class="line"><span class="c1"># =&gt; 26</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>How did 26 get there? The way to think about this is to realize that <code>k</code> captures the execution around <code>control</code>. In this case it’s <code>k = lambda { |x| 1 + x + 7}</code>. So, in the above statement </p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="ruby"><span class="line"><span class="n">k</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">k</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">k</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="mi">2</span><span class="p">)))</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">7</span><span class="p">)</span> <span class="o">+</span> <span class="mi">7</span><span class="p">)</span> <span class="o">+</span> <span class="mi">7</span> <span class="o">=</span> <span class="mi">26</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Delimited/composable continuations are really cool and powerful abstractions. Next time, I’m going to show you how to implement generators and co-routines with them!</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+  
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/03/doorbot-overflow/">Doorbot Overflow</a></h1>
+      
+      
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-03T19:21:00-04:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Today was presentation day at Hacker School. I have a 10 minute talk about “building a better doorbot” which was secretly a talk about exploiting stack buffer overflows.  People seemed to enjoy it.</p>
+
+<p>The slides are available <a href="/assets/files/doorbot_overflow.pdf">here</a>, and the source code is <a href="https://github.com/mveytsman/doorbot_overflow">here</a>.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+  
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/29/hacker-school-the-first-three-weeks/">Hacker School: The First Three Weeks</a></h1>
+      
+      
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-29T19:30:00-04:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>For three weeks now, I’ve been at
+<a href="http://hackerschool.com">Hacker School</a>. Hacker School is hard to
+describe, they call themselves a “writer’s retreat for programmers.”
+Personally I prefer “programmer summer camp,” mostly because I have no
+idea what writer’s retreats are like. Basically it’s a collection of
+people working in a self-directed way to improve their skills as
+programmers. They accept people of all skill levels, as long as you
+have programmed before.  I’ve heard “but Max, you already know Ruby on
+Rails” from more then one person when telling them I’m going to Hacker
+School, so I think I should let you know that Hacker School doesn’t
+have a curriculum, isn’t a bootcamp, and I’m trying to write as little
+Ruby as I can get away while here.</p>
+
+<p>I have a lot to say about what it feels like to go to a Montessori
+school for adults, but I’ll save that for another blog post. This is
+going to be a inventory of what I’ve been working and thinking about
+while here, and some of my goals. One of my goals coming in was to
+blog a lot. I haven’t done it, but I hope this will the first of n
+Hacker School blog posts (for sufficiently large n).</p>
+
+<h2 id="what-im-doing">What I’m Doing</h2>
+
+<p>I’ve started a lot of projects while here, but they fall into two main categories. Courses and Projects.</p>
+
+<h3 id="courses">Courses</h3>
+<ul>
+  <li>I started <a href="https://en.wikibooks.org/wiki/Write_Yourself_a_Scheme_in_48_Hours">Write Yourself a Scheme in 48 Hours</a> with another Hacker Schooler <a href="https://github.com/mveytsman/scheme48">here</a>. I’m finding that I’m not getting a lot of out of it — I’m running into a lot of issues that would be solved with a more traditional Haskell resource, so to that end,</li>
+  <li>I started Yorgey’s Haskell <a href="http://www.cis.upenn.edu/~cis194/">course</a> <a href="https://github.com/mveytsman/scheme48">here</a></li>
+  <li>I started working through this <a href="http://www.trailofbits.com/training/assured_exploitation/">exploitation</a> course.</li>
+  <li>I signed up for Dan Boneh’s <a href="https://www.coursera.org/course/crypto">crypto</a> course which starts tomorrow.</li>
+</ul>
+
+<p>This above is very ambitious, and I fully expect to not finish most of these. I’m pretty sure I’m not going to come back to the Haskell Scheme interpreter course. I would like to finish the Haskell and exploitation class. I’ve started the crypto class many times before already, so there’s that.</p>
+
+<h3 id="projects">Projects</h3>
+<ul>
+  <li>To prove to myself just how much better I understand Ruby then Haskell, I wrote a very simple <a href="https://github.com/mveytsman/rubbyskeme">Scheme interpreter</a> based on Norvig’s <a href="http://norvig.com/lispy.html">lispy</a></li>
+  <li>My main project so far is implementing an <a href="https://github.com/mveytsman/emm-ess-pee">emulator</a> for the <a href="https://en.wikipedia.org/wiki/TI_MSP430">MSP430</a> in clojure.</li>
+</ul>
+
+<h3 id="emulator">Emulator</h3>
+<p>The emulator project has been taking up most of my time here, and it’s worth talking about it more. The MSP430 is the chipset
+used in the <a href="https://microcorruption.com/">MicroCorruption</a> hacking
+game. Working on the emulator has helped me get better at reversing the MIPS assembly used by the processor, and I finally got to the last <a href="https://microcorruption.com/profile/96">level</a> after a 5 month hiatus.</p>
+
+<p>I have two directions I want to take this emulator in. First of all, I have started reading <a href="https://www.usenix.org/system/files/conference/woot12/woot12-final26.pdf">papers</a> about using <a href="https://en.wikipedia.org/wiki/Satisfiability_Modulo_Theories">SMT solvers</a> in binary reverse engineering and exploitation. I would like to develop some heuristics for solving the microcorruption challenges automatically. Since I already have an emulator, the next step would be to emit SMT formulas based on execution traces. I don’t actually understand how to solve the problem deeper then the above sentence, so the real next step is to read more papers.</p>
+
+<p>The other direction I have been thinking about is to port my emulator from Clojure into Clojurescript and build a web-based UI around it. The microcorruption game has a web based emulator, but the emulation actually happens on a sever and the browser provides only the UI. I have this vague idea of using colors to map display bytes in memory and show a buffer overflow as mixing colors. That’s about all I got though, but it’s a good excuse to learn <a href="https://github.com/swannodette/om">Om</a>.</p>
+
+<h2 id="future-posts">Future posts</h2>
+<p>Next time I’ll explain how the biggest lesson I learned from writing a emulator in a functional programming style was about testing and talk about writing my first (!) clojure macros.</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+  
+    
+      <h1 class="entry-title"><a href="/blog/2014/02/25/how-to-locate-any-tinder-user/">How to locate any Tinder user</a></h1>
+      
+      
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-02-25T10:09:00-05:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><strong>You can also find this post on my consultancy’s blog <a href="http://finite.state.io/blog/2014/02/25/how-to-locate-any-tinder-user/">here</a></strong></p>
+
+<p>Last fall, while performing some bespoke security research for one of our clients, I found a way to locate any Tinder user using <a href="https://en.wikipedia.org/wiki/Trilateration">trilateration</a>. Here’s what the proof of concept looks like:</p>
+
+<p><img src="/assets/images/tinder/04_found_max.png" alt="finding me" /></p>
+
+<p>I did a guest post over at the Include Security blog about <strong><a href="http://blog.includesecurity.com/2014/02/how-i-was-able-to-track-location-of-any.html">how I was able to track the location of any Tinder user</a></strong>.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+  
+    
+      <h1 class="entry-title"><a href="/blog/2013/11/30/thoughts-on-bsidesto/">Thoughts On Bsidesto</a></h1>
+      
+      
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-30T12:00:00-05:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>** You can also find this post on my consultancy’s blog <a href="http://finite.state.io/blog/2013/11/30/thoughts-on-bsidesto/">here</a> **</p>
+
+<p>Last month, I helped organize a security conference in Toronto called <a href="http://bsidesto.ca">BsidesTO</a>. I’ve attended and volunteered at my fair share of conferences, but this is the first time I’ve had an integral role in throwing and event of this scale. </p>
+
+<p>One day, two floors, 14 speakers, and over 150 attendees. It was a blast. An exhausting blast.</p>
+
+<p><a href="http://www.securitybsides.com/w/page/12194156/FrontPage">Bsides</a>. is a brand for security conferences around the world. </p>
+
+<blockquote>
+  <p>What is BSides?
+Each BSides is a community-driven framework for building events for and by information security community members.  The goal is to expand the spectrum of conversation beyond the traditional confines of space and time.  It creates opportunities for individuals to both present and participate in an intimate atmosphere that encourages collaboration. It is an intense event with discussions, demos, and interaction from participants. It is where conversations for the next-big-thing are happening. </p>
+</blockquote>
+
+<p>The Toronto security community had long wanted a Bsides of its own to compliment the larger <a href="http://sector.ca/">SecTor</a> conference. 2013 was the first year that things came together and a successful Bsides in Toronto was launched. </p>
+
+<h2 id="if-you-build-it-they-will-come">If you build it they will come</h2>
+<p>Conferences without speakers are just parties. Which isn’t a bad thing, but we’re throwing a conference damnit! To be a conference, someone has to talk.</p>
+
+<p>At first, getting enough speakers concerned me the most. Having spoken at conferences before, I know how harrowing it can be to put yourself out there in front of a crowd. Because we were starting a brand new event, I was constantly anxious that no one would want to speak, thus forcing me to spend 6 hours performing magic tricks to entertain the attendees.</p>
+
+<p>This worry was entirely unfounded. I had no idea how many smart talented people are willing to show up to a hitherto unknown event with their research and perspectives. </p>
+
+<p>We had an amazing group of speakers show up, and I’m proud of all of them for making the conference the success that it was.  </p>
+
+<h2 id="the-other-kind-of-speakers-matter-too">The other kind of speakers matter too</h2>
+<p>No matter how much you plan ahead, something will go wrong. </p>
+
+<p>We ran the conference on two floors of the Monarch Tavern. We piped audio and video from the talks to televisions upstairs, so people could have a lounge like atmosphere while they watched the talks.</p>
+
+<p>I still think the model was solid. The “Hallway Track” is always a great experience at conferences. We wanted to create an atmosphere where you could converse with your friends while still paying attention to talks and not bothering other attendees.</p>
+
+<p>There were some issues with the audio quality upstairs, and my main lesson learned for next year is to improve the A/V experience as much as possible.</p>
+
+<h2 id="sleep">Sleep</h2>
+<p>Sleep is important. BsidesTO happened to be on the night of Nuit Blanche. If you went out that night, I’m impressed. I for one went home and slept for 36 hours.</p>
+
+<h2 id="in-conclusion">In conclusion</h2>
+<p>Organizing BSidesTO was one of the best experiences I’ve had in 2013, and I hope you had a good time at the conference as well. My eternal thanks to everyone else involved: <a href="https://twitter.com/bitgamble">Jamie</a>, <a href="https://twitter.com/gattaca">Dave</a>, <a href="https://twitter.com/ironfog">Ben</a>, <a href="https://twitter.com/phillmv">Phill</a>, <a href="https://twitter.com/syzygos">Laura</a>, and the staff of <a href="http://www.themonarchtavern.com/">The Monarch</a>.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+  
+    
+      <h1 class="entry-title"><a href="/blog/2012/11/09/hacking-letterpress/">Hacking Letterpress</a></h1>
+      
+      
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-11-09T14:38:00-05:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><strong>You can also find this post on my consultancy’s blog <a href="http://finite.state.io/blog/2012/11/09/hacking-letterpress/">here</a></strong></p>
+
+<p><a href="http://www.atebits.com/letterpress/">Letterpress</a> is an iOS game
+that came out a few weeks ago and immediately became popular enough to <a href="https://twitter.com/marcoarment/statuses/261337316268859392">take down Apple’s GameCenter</a>. It’s a cross between <a href="http://daringfireball.net/linked/2012/10/24/letterpress">Scrabble and Go</a>. The game is played on a board made out of 25 letters and players take turns building words in order to capture the letters they use. </p>
+
+<p>I was hopelessly addicted to Letterpress until I figured out how to win consistently.</p>
+
+<p><img src="/assets/images/letterpress/winning.png" alt="winning" /></p>
+
+<p>As it turns out, letterpress’s dictionary is stored on the device. By simply adding words to Letterpress’s dictionary, you can register any
+combination of letters as a valid word. </p>
+
+<p>Inside your iPhone, the dictionary is spread across a
+series of text files located in <code>/&lt;Letterpress
+folder&gt;/Letterpress.app/o/[ab-zz].txt</code>. For instance, <code>ab.txt</code>
+contains all the words that begin with aa, and so on and so forth.</p>
+
+<p>However, digging around a bunch of text files is no fun, and so I decided to
+write a tool to help me out.</p>
+
+<p>By the way, the author of Letterpress does <a href="https://twitter.com/lorenb/status/261617107656138752">know</a> about people cheating this way. </p>
+
+<h2 id="automating-letterpress-cheating">Automating Letterpress cheating</h2>
+
+<p>First of all, it’s a common misconception that you need to jailbreak a
+phone in order to access an individual app’s files. 
+Tools like
+<a href="http://www.macroplant.com/iexplorer/">iExplorer</a> allow you to, among
+other things, access an app’s directory and modify the files there on any iPhone. (It’s my understanding that they’re using undocumented calls in the library iTunes uses for syncing in order to
+pull this off.)</p>
+
+<p>Since I didn’t want to rely on a commercial tool like iExplorer,
+I decided to use <a href="http://www.libimobiledevice.org/">libimobiledevice</a>. Libimobiledevice
+is an open-source library for talking to iDevices over USB. It’s capable of providing
+access to the filesystem, the iPhone internals, and much more. 
+Libimobiledevice supports both OS X and Linux.</p>
+
+<p>I wrote a ruby gem that acts as an adapter for
+libimobiledevice and exposes some of the API calls in an object-oriented way. It’s available on github as
+<a href="https://github.com/stateio/imobiledevice">imobiledevice</a>. So far, I have
+implemented only the small subset of libimobiledevice that I need,
+but I definitely welcome pull requests.</p>
+
+<p>Once I had a ruby wrapper for for libimobiledevice, it was simple to
+write an app that adds arbitrary words to the Letterpress dictionary.
+I call it
+<a href="https://github.com/stateio/letterpress-lexicographer">letterpress-lexicographer</a>.
+Here’s how it works:</p>
+
+<h2 id="is-this-a-word">Is this a word?</h2>
+
+<p><img src="/assets/images/letterpress/before.png" alt="Before" /></p>
+
+<h2 id="shucks">Shucks!</h2>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">./letterpress-lexicographer.rb
+</span><span class="line"> [*] Connecting to iDevice
+</span><span class="line"> [*] Connected to iDevice. UDID:REDACTED
+</span><span class="line"> [*] Accessing Letterpress app
+</span><span class="line"> [*] Accessed Letterpress app
+</span><span class="line"> [?] What word would you like to add? (/q to quit)
+</span><span class="line">  -&gt; szug
+</span><span class="line"> [+] Reading word-list /Letterpress.app/o/sz.txt
+</span><span class="line"> [+] Inserting word szug into word-list /Letterpress.app/o/sz.txt
+</span><span class="line"> [+] Successfully added word szug.  You can play it now!</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>## Let’s try again
+<img src="/assets/images/letterpress/after.png" alt="After" /></p>
+
+<p>You can find the app <a href="https://github.com/stateio/letterpress-lexicographer">here</a>.  Please enjoy responsibly.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+  
+    
+      <h1 class="entry-title"><a href="/blog/2012/10/31/breaking-in-and-out-of-vagrant/">Breaking in and out of Vagrant</a></h1>
+      
+      
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-10-31T17:11:00-04:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>**You can also find this post on my consultancy’s blog <a href="http://finite.state.io/blog/2012/10/30/breaking-in-and-out-of-vagrant/">here</a> **</p>
+
+<p><a href="http://vagrantup.com/">Vagrant</a> is a great tool that allows you to
+easily spawn and configure lightweight VMs to use as development
+environments. Vagrant provides base installs of several flavours of
+Linux, and takes care of setting up networking and shared folders for
+you.  </p>
+
+<p>Vagrant is really useful for managing your development environment,
+and I highly recommend it. If you’re doing a lot of development,
+you might need to be running all kinds of application and database
+servers on your machine, and it’s probably a much better idea to run
+them in a VM rather than on your host machine.  </p>
+
+<p>Unfortunately, if you expose your Vagrant VMs (or any development VMs
+really) to the outside world, what seemed like a secure best practice
+can end up being very insecure. This isn’t a novel concept, but the
+disposable nature of virtual machines makes it easy to forget to think
+about their security. A common attitude is “What’s the worst that can
+happen if someone gets on my development VM? I blow away and
+re-generate this VM every half hour anyway, and aren’t VM escape bugs
+rare and esoteric anyway?”  </p>
+
+<p>I’m going to show a really simple way to break out of Vagrant VMs, but first,</p>
+
+<h2 id="how-vagrant-is-used">How Vagrant is Used</h2>
+
+<p>Vagrant VMs are designed to be lightweight and built per-project. The
+VMs around a concept of “base boxes,” which are base installs of
+various flavours of linux. You initialize a Vagrant VM from a base
+box, and then can install your desired environment.</p>
+
+<p>By default, Vagrant shares your project folder 
+with the VM at <code>/vagrant/</code>. So, a usual workflow would be:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line">host: <span class="nv">$ </span><span class="nb">cd</span> /my/project/here/
+</span><span class="line">host: <span class="nv">$ </span><span class="c">#we&#39;re going to base our VM on an Ubuntu Lucid 32bit base box </span>
+</span><span class="line">host: <span class="nv">$ </span>vagrant box add lucid32 http://files.vagrantup.com/lucid32.box
+</span><span class="line">host: <span class="nv">$ </span>vagrant init lucid32
+</span><span class="line">host: <span class="nv">$ </span>vagrant up
+</span><span class="line">host: <span class="nv">$ </span>vagrant ssh
+</span><span class="line">  vm: <span class="nv">$ </span><span class="c">#now we are on the VM</span>
+</span><span class="line">  vm: <span class="nv">$ </span><span class="nb">cd</span> /vagrant/
+</span><span class="line">  vm: <span class="nv">$ </span>run_my_server
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>You can then edit the code on your host machine, and use the VM to run an applciation and database server.</p>
+
+<h2 id="bridging-the-network">Bridging the Network</h2>
+
+<p>Just like in any virtual machine, you can configure your Vagrant VMs’
+networking to run in host-only mode or in bridged mode. In host-only
+mode, a VM uses a virtual network adapter and is basically only
+accessible from the host. In bridged mode, the VM bridges through the
+network adapter of the host machine, and actually connects to the same
+network as the host. So, for example, if you bridge a VM to a wifi
+device, the VM will have a different IP address on the same wifi
+network as the host. And of course, you’ll be able to access the VM
+from other machines on the wifi network. In host-only mode, the VM is
+not accessible from outside the host. As they say, NAT is the poor
+man’s firewall.</p>
+
+<p>The Vagrant
+<a href="http://vagrantup.com/v1/docs/bridged_networking.html">documentation</a>
+doesn’t mention any security risks of running development VMs in
+bridged mode. There’s a promising alert box, but the contents are:</p>
+
+<blockquote>
+  <h4 id="not-all-networks-work">Not All Networks Work!</h4>
+  <p>Some networks will not work properly with bridged networking. Specifically, I’ve found that hotel networks, airport networks, and generally public-shared networks have configurations in place such that bridging does not work.
+You can tell if the bridged networking worked successfully by seeing if the virtual machine was able to get an IP address on the bridged adapter.</p>
+</blockquote>
+
+<p>The author doesn’t seem to see any intrinsic problem with running Vagrant VMs in hotels, airports, and coffee-shops outside of it sometimes not working.</p>
+
+<h2 id="breaking-in">Breaking In</h2>
+
+<p>So after scanning the airport wifi, you found someone running a
+Vagrant VM in bridged mode. How do you get in? First of all, they are
+most like likely doing some kind of development on it, so the VM is
+probably running an app that’s not very secured. There’s also a good
+chance that this VM is running a database and maybe CouchDB or Redis.
+One of these is probably using guessable credentials (this is the
+development environment after all), or the app itself might have an
+exploitable bug.</p>
+
+<p>All of the above sounds too hard. Remember the <code>vagrant ssh</code> command
+above? Well, it has to get in somehow.  </p>
+
+<p>On all of the VMs built from official base boxes, like <code>lucid32</code> the
+credentials are <code>vagrant : vagrant</code>. The instructions for developers
+building new base boxes actually say not to use password-based SSH
+logins. Instead, anyone building a base box for public consumption is
+using these <a href="https://github.com/mitchellh/vagrant/tree/master/keys/">SSH keys</a> for the
+<code>vagrant</code> user.</p>
+
+<p>Either way, any Vagrant VM built from a public base box (read: almost
+all of them) is going to be accessible with either <code>vagrant : vagrant</code>
+or the SSH keys above.</p>
+
+<h2 id="breaking-out">Breaking Out</h2>
+
+<p>Breaking into a development VM isn’t a big deal on it’s own,
+especially since the vagrant workflow encourages blowing-away and
+rebuilding the VM often. What you really want is code execution on the
+host, and it’s going to be surprisingly easy to do that.</p>
+
+<p>The Vagrant workflow encourages you to edit your code outside the VM.
+That’s why Vagrant helpfully shares the project directory as
+<code>/vagrant/</code> in the VM. It’s a safe assumption that anyone using
+Vagrant for development is using some kind of version control, and if
+that’s the case, they are probably going to be interacting with it on
+the host machine (where they edit the code). This is how we’ll get
+execution on the host.</p>
+
+<p>For simplicity, I’m going to focus on Git, but this trick should work
+for any other commonly used VCS. Hooks are little shell scripts that
+run after you commit a certain action. For instance, a <code>post-commit</code>
+hook is a shell script that git will execute every time a commit is
+completed. Hooks are placed in <code>.git/hooks/HOOK-NAME</code>.</p>
+
+<p>So if I get on a Vagrant VM and want to escape into the host, all I
+have to do is create a post-commit hook. I simply put evil things in
+<code>/vagrant/.git/hooks/post-commit</code> and wait for the user to commit some
+code. Since the <code>/vagrant/</code> directory is mounted from the host, my
+hook will persist even if the user destroys the VM.</p>
+
+<p>If you liked this, you should follow me on <a href="https://twitter.com/mveytsman">twitter</a>.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  <div class="pagination">
+    
+      <a class="prev" href="2">&larr; Older</a>
+    
+    <a href="/blog/archives">Blog Archives</a>
+    
+  </div>
+</div>
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/10/18/solving-the-expression-problem-in-clojure/">Solving the Expression Problem in Clojure</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/28/how-to-take-over-any-java-developer/">How to take over the computer of any Java (or Clojure or Scala) developer</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/21/delimited-continuations-in-ruby-part-2/">Delimited Continuations in Ruby Part 2: Generators and Coroutines</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/12/delimited-continuations-in-ruby/">Delimited Continuations in Ruby Part 1</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/03/doorbot-overflow/">Doorbot Overflow</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  
+  <a href="https://github.com/mveytsman">@mveytsman</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'mveytsman',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+
+
+  
+</aside>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Max Veytsman <br/>
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a>, customized with <a href="https://github.com/mjhea0/whiterspace">whiterspace</a>.</span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

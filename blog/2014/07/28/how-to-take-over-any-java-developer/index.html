@@ -1,0 +1,354 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>How to take over the computer of any Java (or Clojure or Scala) developer - Ontoillogical</title>
+  <meta name="author" content="Max Veytsman">
+
+  
+  <meta name="description" content="Update: 07/31/2014 Sonatype has reacted to this post and will soon be turning on SSL access for all users. Their blog post announcing this is here. I &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://blog.ontoillogical.com/blog/2014/07/28/how-to-take-over-any-java-developer">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Ontoillogical" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Fjalla+One' rel='stylesheet' type='text/css'>
+  
+
+</head>
+
+<body   class="collapse-sidebar sidebar-footer" >
+  <header role="banner">
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:blog.ontoillogical.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+  
+    
+      <h1 class="entry-title">How to take over the computer of any Java (or Clojure or Scala) developer</h1>
+    
+  
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-28T14:12:48-04:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p><strong>Update: 07/31/2014</strong></p>
+
+<p>Sonatype has reacted to this post and will soon be turning on SSL access for all users. Their blog post announcing this is <a href="http://blog.sonatype.com/2014/07/ssl_connectivity_for_central/">here</a>. I’m very happy that they are making this change, and the Java ecosystem is going to be more secure for it!</p>
+
+<p>That being said, if you’re reading this and are thinking of charging $10 to gauge the true demand for security features in your product, don’t. Imagine if car companies decided to charge $10 to gauge the true demand for air bags. Luckily, we live in a world where car companies can’t legally do that.</p>
+
+<p>I’m happy that Sonatype made this change in their policy, and I hope they continue to <em>decrease</em> friction for security features in their products. It’s our responsibility as developers to make the most secure product we can for our users. How much friction they are willing to endure for a security feature shouldn’t factor into it. </p>
+
+<hr />
+
+<p>The other day I started hacking on a Clojure project of mine, when I saw my firewall display this:</p>
+
+<p><img src="/assets/images/dilettante/firewall.png" width="500" /></p>
+
+<p>I’m downloading clojure.jar from <a href="http://repo.maven.apache.org">http//repo.maven.apache.org</a> over port 80! This means that I’m going to be downloading JARs over unencrypted http. I thought this was an <a href="https://github.com/technomancy/leiningen/issues/1604">issue</a> with <a href="http://leiningen.org/">leiningen</a> at first. As it turns out it’s not lein’s fault at all. Clojure.jar, and a whole lot of other JARs that are important in the Java/Clojure/Scala/etc world are officially hosted on <a href="http://search.maven.org/">Maven Central</a>, which is a public service provided by <a href="http://www.sonatype.com/">Sonatype</a>. Sonatype has a policy that they only allow SSL access to people who have authentication tokens. <strong>In order to get an authentication token and SSL access, you need to donate $10 to the Apache foundation.</strong> If you don’t believe me, the donate page is <a href="http://www.sonatype.com/clm/secure-access-to-central">here</a>, and the blog post announcing this policy is <a href="http://www.sonatype.com/clm/secure-access-to-central">here</a>. They even mention man-in-the-middle attacks on it.</p>
+
+<p>Because authentication tokens are issued per user/organization, tools like maven and leiningen can’t bundle authentication tokens. If you’re pulling down some Java project and installing its dependencies, you’re not going over SSL. This policy was confirmed by a Sonatype employee when I got into a twitter tiff about this:</p>
+
+<p><img src="/assets/images/dilettante/tweet.png" width="500" /></p>
+
+<p>Unless you take very careful steps that involve paying someone $10, JARs you download can be man-in-the-middled, and code you execute on your system can be replaced by malware.</p>
+
+<p>When can this happen? If you ever use a public wifi network in a coffee shop, or are on a wifi network that someone <a href="https://ettercap.github.io/ettercap/">took over</a> you can be man-in-the-middled. Your ISP can man-in-the-middle you at will, and some do so in order to serve you ads. Or, perhaps you are subject to a man-in-the-middle attack from a <a href="http://www.renesys.com/2013/11/mitm-internet-hijacking/">state actor</a>.</p>
+
+<h2 id="dilettante">Dilettante</h2>
+
+<p>To prove how easy this is to do, I wrote <a href="https://github.com/mveytsman/dilettante">dilettante</a>, a man-in-the-middle proxy that intercepts JARs from maven central and injects malicious code into them.</p>
+
+<p>Proxying HTTP traffic through dilettante will backdoor any JARs downloaded from maven central. The backdoored version will retain their functionality, but display a nice message to the user when they use the library. You can see the video below:</p>
+
+<video width="" height="" preload="none" controls="" poster=""><source src="http://blog.ontoillogical.com/assets/files/dilettante_screencast.mp4" type="video/mp4; codecs=&quot;avc1.42E01E, mp4a.40.2&quot;" /></video>
+
+<p>Or a screenshot:</p>
+
+<p><img src="/assets/images/dilettante/screen.png" width="800" /></p>
+
+<p>You can find the code <a href="https://github.com/mveytsman/dilettante">here</a></p>
+
+<h2 id="the-technical-details">The Technical Details</h2>
+
+<p>When JARs are downloaded from Maven Central, they go over HTTP, so a man in the middle proxy can replace them at will. It’s possible to sign jars, but in my experimentation with standard tools, these signatures aren’t checked. The only other verification is a SHA1 sum, which is also sent over HTTP. When dilettante sees a JAR coming from Maven Central it replaces the original JAR with a backdoored version that runs malicious code on the victim’s computer. Since the SHA1 hashes are sent over HTTP only, dilettante simply replaces any hashes it sees with the hash of the corresponding backdoored JAR.</p>
+
+<p>I used the excellent <a href="http://mitmproxy.org/">mitmproxy</a> library to build my tool. I started by writing an <a href="http://mitmproxy.org/doc/scripting/inlinescripts.html">inline script</a> for the proxy and then moved on to creating a standalone tool with <a href="http://mitmproxy.org/doc/scripting/libmproxy.html">libmproxy</a>.</p>
+
+<p>A JAR is just a zip file that contains Java Class files, resources and some metadata. To backdoor a JAR, I can insert my own class by adding it to the zip archive:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="kn">package</span> <span class="n">dilettante</span><span class="o">;</span>
+</span><span class="line">
+</span><span class="line"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Dilettante</span> <span class="o">{</span>
+</span><span class="line">    <span class="kd">public</span> <span class="kd">static</span> <span class="nf">void</span><span class="o">()</span> <span class="o">{</span>
+</span><span class="line">        <span class="c1">// do some evil stuff</span>
+</span><span class="line">    <span class="o">}</span>
+</span><span class="line"><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>The trick is finding a way to call my malicious class. I know that my victim will be downloading some library, and I need to run my malicious code regardless of what classes in the library they actually use. I would also like to actual functionality of the library to not be affected.</p>
+
+<p>Java has the concept of static class blocks, which are class level initializers — that is, they contain code that is run once when the class (not an instance!) is loaded into memory. After I insert a malicious class file into the jar, I can call it in a static block like this:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="kn">import</span> <span class="nn">dilettante.*</span><span class="o">;</span>
+</span><span class="line"><span class="kd">static</span> <span class="o">{</span>
+</span><span class="line">    <span class="n">Dilettante</span><span class="o">.</span><span class="na">backdoor</span><span class="o">();</span>
+</span><span class="line"><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>In order to inject the above snippet, I need to inject it into Java classes directly, not source files. I use <a href="https://github.com/Storyyeller/Krakatau">Krakatau</a>, a Java disassembler/assembler library for Python. It let’s me add the snippet in <a href="http://jasmin.sourceforge.net/">Jasmin</a> format:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="o">.</span><span class="na">method</span> <span class="kd">static</span> <span class="o">&lt;</span><span class="n">clinit</span><span class="o">&gt;</span> <span class="o">:</span> <span class="o">()</span><span class="n">V</span>
+</span><span class="line">  <span class="o">;</span> <span class="n">method</span> <span class="n">code</span> <span class="nl">size:</span> <span class="mi">4</span> <span class="n">bytes</span>
+</span><span class="line">  <span class="o">.</span><span class="na">limit</span> <span class="n">stack</span> <span class="mi">0</span>
+</span><span class="line">  <span class="o">.</span><span class="na">limit</span> <span class="n">locals</span> <span class="mi">0</span>
+</span><span class="line">  <span class="n">invokestatic</span> <span class="n">dilettante</span><span class="o">/</span><span class="n">Dilettante</span> <span class="nf">backdoor</span> <span class="o">()</span><span class="n">V</span>
+</span><span class="line">  <span class="k">return</span>
+</span><span class="line"><span class="o">.</span><span class="na">end</span> <span class="n">method</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h2 id="limitations">Limitations</h2>
+<p>This is a proof of concept!, and so it still has some limitations</p>
+
+<ol>
+  <li>
+    <p>Currently it’s not very fast. There are a couple of reasons for this</p>
+
+    <ul>
+      <li>I have to run a disassemble and an assemble step. It would be more efficient to directly append the assembled shim to the .class file.</li>
+      <li>The way I am using Python’s zipfile library, I’m actually creating a second copy of every class in the zip. This is inefficient in terms of space and speed. Careful reading of the zip spec may lead to an efficient way of appending data to files inside a zip.</li>
+    </ul>
+  </li>
+  <li>
+    <p>If a user is downloading multiple JARs in one go, we will backdoor each one. The malicious payload is executed only once per JAR, but if multiple JARs are backdoored, we will execute it several times. This issue will disappear if we replace the cat picture with a high quality persistent backdoor that is smart enough to only infect a system once :).</p>
+  </li>
+</ol>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Max Veytsman</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-28T14:12:48-04:00" pubdate data-updated="true"></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/hacker-school/'>hacker_school</a>, <a class='category' href='/blog/categories/security/'>security</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://blog.ontoillogical.com/blog/2014/07/28/how-to-take-over-any-java-developer/" data-via="mveytsman" data-counturl="http://blog.ontoillogical.com/blog/2014/07/28/how-to-take-over-any-java-developer/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/07/21/delimited-continuations-in-ruby-part-2/" title="Previous Post: Delimited Continuations in Ruby Part 2: Generators and Coroutines">&laquo; Delimited Continuations in Ruby Part 2: Generators and Coroutines</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/10/18/solving-the-expression-problem-in-clojure/" title="Next Post: Solving the Expression Problem in Clojure">Solving the Expression Problem in Clojure &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/10/18/solving-the-expression-problem-in-clojure/">Solving the Expression Problem in Clojure</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/28/how-to-take-over-any-java-developer/">How to take over the computer of any Java (or Clojure or Scala) developer</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/21/delimited-continuations-in-ruby-part-2/">Delimited Continuations in Ruby Part 2: Generators and Coroutines</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/12/delimited-continuations-in-ruby/">Delimited Continuations in Ruby Part 1</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/03/doorbot-overflow/">Doorbot Overflow</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  
+  <a href="https://github.com/mveytsman">@mveytsman</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'mveytsman',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Max Veytsman <br/>
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a>, customized with <a href="https://github.com/mjhea0/whiterspace">whiterspace</a>.</span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

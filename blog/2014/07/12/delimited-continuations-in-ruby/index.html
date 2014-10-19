@@ -1,0 +1,435 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Delimited Continuations in Ruby Part 1 - Ontoillogical</title>
+  <meta name="author" content="Max Veytsman">
+
+  
+  <meta name="description" content="For the past few days at Hacker School, I’ve been exploring continuations. Continuations are hard to describe. Basically, a continuation represents &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://blog.ontoillogical.com/blog/2014/07/12/delimited-continuations-in-ruby">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Ontoillogical" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Fjalla+One' rel='stylesheet' type='text/css'>
+  
+
+</head>
+
+<body   class="collapse-sidebar sidebar-footer" >
+  <header role="banner">
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:blog.ontoillogical.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+  
+    
+      <h1 class="entry-title">Delimited Continuations in Ruby Part 1</h1>
+    
+  
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-12T09:30:00-04:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>For the past few days at Hacker School, I’ve been exploring continuations. Continuations are hard to describe. Basically, a continuation represents the execution state of a program at a point. Capturing the continuation and invoking it later allows you to come back to that point in the programs execution. Continuations can be used to implement complicated control flow constructs.</p>
+
+<p>If that was complicated, here’s a sandwich metaphor from <a href="https://groups.google.com/forum/#!msg/perl.perl6.language/-KFNPaLL2yE/_RzO8Fenz7AJ">Luke Palmer</a>:</p>
+
+<blockquote>
+  <p>Say you’re in the kitchen in front of the refrigerator, thinking about a sandwich. You take a continuation right there and stick it in your pocket. Then you get some turkey and bread out of the refrigerator and make yourself a sandwich, which is now sitting on the counter. You invoke the continuation in your pocket, and you find yourself standing in front of the refrigerator again, thinking about a sandwich. But fortunately, there’s a sandwich on the counter, and all the materials used to make it are gone. So you eat it. :-)</p>
+</blockquote>
+
+<p>Another way to put it: a captured continuation is a label, and to invoke it is to GOTO.</p>
+
+<h2 id="the-basics">The Basics</h2>
+
+<p>On that note, let’s start by building a simple GOTO.</p>
+
+<p>In Ruby, you need to <code>require 'continuation'</code> to enable continuations. <code>callcc</code> takes a block, and passes it the current continuation as parameter. That continuation can be invoked later.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+</pre></td><td class="code"><pre><code class="ruby"><span class="line"><span class="nb">require</span> <span class="s1">&#39;continuation&#39;</span>
+</span><span class="line"><span class="vg">$labels</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span class="line">
+</span><span class="line"><span class="k">def</span> <span class="nf">label</span><span class="p">(</span><span class="n">label_name</span><span class="p">)</span>
+</span><span class="line">  <span class="nb">callcc</span> <span class="p">{</span> <span class="o">|</span><span class="n">continuation</span><span class="o">|</span>   <span class="vg">$labels</span><span class="o">[</span><span class="n">label_name</span><span class="o">]</span> <span class="o">=</span> <span class="n">continuation</span> <span class="p">}</span>
+</span><span class="line"><span class="k">end</span>
+</span><span class="line">
+</span><span class="line"><span class="k">def</span> <span class="nf">goto</span><span class="p">(</span><span class="n">label_name</span><span class="p">)</span>
+</span><span class="line">  <span class="k">unless</span> <span class="vg">$labels</span><span class="o">.</span><span class="n">has_key?</span> <span class="n">label_name</span>
+</span><span class="line">    <span class="k">raise</span> <span class="s2">&quot;No label </span><span class="si">#{</span><span class="n">label_name</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class="line">  <span class="k">end</span>
+</span><span class="line">  <span class="vg">$labels</span><span class="o">[</span><span class="n">label_name</span><span class="o">].</span><span class="n">call</span>
+</span><span class="line"><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>We can then build a for loop</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</pre></td><td class="code"><pre><code class="ruby"><span class="line"><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+</span><span class="line"><span class="nb">puts</span> <span class="s2">&quot;entering loop&quot;</span>
+</span><span class="line"><span class="n">label</span> <span class="s2">&quot;loop&quot;</span>
+</span><span class="line"><span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">10</span>
+</span><span class="line">  <span class="nb">puts</span> <span class="n">i</span>
+</span><span class="line">  <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+</span><span class="line">  <span class="n">goto</span> <span class="s2">&quot;loop&quot;</span>
+</span><span class="line"><span class="k">end</span>
+</span><span class="line"><span class="nb">puts</span> <span class="s2">&quot;loop done&quot;</span>
+</span><span class="line"><span class="nb">puts</span> <span class="s2">&quot;i is </span><span class="si">#{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>We can even build a reverse GOTO (known as the COMEFROM, implementation courtesy of <a href="https://en.wikipedia.org/wiki/COMEFROM#Practical_uses">Wikipedia</a>).</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+</pre></td><td class="code"><pre><code class="ruby"><span class="line"><span class="vg">$come_from_labels</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span class="line">
+</span><span class="line"><span class="k">def</span> <span class="nf">label</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+</span><span class="line">    <span class="k">if</span> <span class="vg">$come_from_labels</span><span class="o">[</span><span class="n">l</span><span class="o">]</span>
+</span><span class="line">        <span class="vg">$come_from_labels</span><span class="o">[</span><span class="n">l</span><span class="o">].</span><span class="n">call</span>
+</span><span class="line">    <span class="k">end</span>
+</span><span class="line"><span class="k">end</span>
+</span><span class="line">
+</span><span class="line"><span class="k">def</span> <span class="nf">come_from</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+</span><span class="line">    <span class="nb">callcc</span> <span class="k">do</span> <span class="o">|</span><span class="n">block</span><span class="o">|</span>
+</span><span class="line">        <span class="vg">$come_from_labels</span><span class="o">[</span><span class="n">l</span><span class="o">]</span> <span class="o">=</span> <span class="n">block</span>
+</span><span class="line">    <span class="k">end</span>
+</span><span class="line"><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h2 id="problems-abound">Problems Abound</h2>
+
+<p>You can implement pretty much any control flow you want with continuations, but it may be <a href="http://okmij.org/ftp/continuations/against-callcc.html#traps">hairy</a>.</p>
+
+<p>To give an example of the kind of problems you face when working with traditional continuations, here’s a bug I ran into when writing the GOTO example above. My orginal code for <code>label</code> looked like this: </p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class="ruby"><span class="line"><span class="k">def</span> <span class="nf">label</span><span class="p">(</span><span class="n">label_name</span><span class="p">)</span>
+</span><span class="line">   <span class="vg">$labels</span><span class="o">[</span><span class="n">label_name</span><span class="o">]</span> <span class="o">=</span> <span class="nb">callcc</span> <span class="p">{</span> <span class="o">|</span><span class="n">continuation</span><span class="o">|</span> <span class="n">continuation</span> <span class="p">}</span>
+</span><span class="line"><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Running it, I got the following output:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</pre></td><td class="code"><pre><code class="ruby"><span class="line"><span class="n">entering</span> <span class="kp">loop</span>
+</span><span class="line"><span class="mi">1</span>
+</span><span class="line"><span class="mi">2</span>
+</span><span class="line"><span class="n">goto</span><span class="o">.</span><span class="n">rb</span><span class="p">:</span><span class="mi">15</span><span class="ss">:in</span> <span class="sb">`goto&#39;: undefined method `</span><span class="n">call</span><span class="s1">&#39; for nil:NilClass (NoMethodError)</span>
+</span><span class="line"><span class="s1">	from goto.rb:27:in `&lt;main&gt;&#39;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Can you guess the issue? When <code>goto</code> was called, it returned to the place where <code>callcc</code> was called. That means that whatever was passed to the continuation would now be assigned to <code>$labels[label_name]</code>. We didn’t pass anything to the continuation, and so <code>$labels[label_name]</code> becomes <code>nil</code>.</p>
+
+<p>To further illustrate the point:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</pre></td><td class="code"><pre><code class="ruby"><span class="line"><span class="vg">$continuation</span> <span class="o">=</span> <span class="nb">callcc</span> <span class="p">{</span> <span class="o">|</span><span class="n">continuation</span><span class="o">|</span> <span class="n">continuation</span> <span class="p">}</span>
+</span><span class="line"><span class="nb">puts</span> <span class="s2">&quot;$continuation is </span><span class="si">#{</span><span class="vg">$continuation</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class="line"><span class="c1"># &quot;$continuation is #&lt;Continuation:0x007fbbaa0193f8&gt;&quot;</span>
+</span><span class="line"><span class="vg">$continuation</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="s2">&quot;hello world&quot;</span><span class="p">)</span>
+</span><span class="line"><span class="nb">puts</span> <span class="s2">&quot;$continuation is </span><span class="si">#{</span><span class="vg">$continuation</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class="line"><span class="c1"># &quot;$continuation is hello world&quot;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>It seems like it would be convent to separate the concept of shifting control from the place we want to return to.</p>
+
+<h2 id="enter-delmited-continuations">Enter delmited continuations</h2>
+
+<p><a href="https://en.wikipedia.org/wiki/Delimited_continuation">Delimited continuations</a> are way of capturing a fixed slice of computation instead of the unlimited computation captured by a regular continuation.</p>
+
+<p>I wrote a little library called <a href="https://github.com/mveytsman/delimr">DelimR</a> that implemnts delimited continuations for ruby by using the native <code>callcc</code> construct. I made a direct port of Oleg Kiselyov’s scheme <a href="http://okmij.org/ftp/continuations/implementations.html#delimcc-scheme">implementation</a>. In an inversion of Knuth’s famous <a href="http://staff.science.uva.nl/~peter/knuthnote.pdf">line</a>, the code seems to work, but I don’t understand it.</p>
+
+<p>Delimited continuations have two operations. <code>prompt</code> marks a continuation, when the continuation is invoked, it will return to where prompt was called. <code>control</code> allows us to capture the continuation.</p>
+
+<p>It’s best to demonstrate this with some examples. <code>prompt</code> on it’s own is a no-op.
+&lt;div class=&#8217;bogus-wrapper&#8217;&gt;<notextile><figure class="code">&lt;figcaption&gt;<span></span>&lt;/figcaption&gt;&lt;div class=&#8221;highlight&#8221;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#8221;gutter&#8221;&gt;&lt;pre class=&#8221;line-numbers&#8221;&gt;<span class="line-number">1</span>
+<span class="line-number">2</span>
+&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#8217;code&#8217;&gt;&lt;pre&gt;<code class="ruby"><span class="line"><span class="no">DelimR</span><span class="o">.</span><span class="n">prompt</span> <span class="p">{</span> <span class="mi">123</span> <span class="p">}</span>
+</span><span class="line"><span class="c1"># =&gt; 123</span>
+</span></code>&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</figure></notextile>&lt;/div&gt;
+Inside of <code>prompt</code>, you can call <code>control</code>, and pass it a block that receives a continuation as an argument
+&lt;div class=&#8217;bogus-wrapper&#8217;&gt;<notextile><figure class="code">&lt;figcaption&gt;<span></span>&lt;/figcaption&gt;&lt;div class=&#8221;highlight&#8221;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#8221;gutter&#8221;&gt;&lt;pre class=&#8221;line-numbers&#8221;&gt;<span class="line-number">1</span>
+<span class="line-number">2</span>
+&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#8217;code&#8217;&gt;&lt;pre&gt;<code class="ruby"><span class="line"><span class="no">DelimR</span><span class="o">.</span><span class="n">prompt</span> <span class="p">{</span> <span class="mi">1</span> <span class="o">+</span> <span class="no">DelimR</span><span class="o">.</span><span class="n">control</span> <span class="p">{</span> <span class="o">|</span><span class="n">k</span><span class="o">|</span> <span class="n">k</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="p">}}</span>
+</span><span class="line"><span class="c1"># =&gt; 3</span>
+</span></code>&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</figure></notextile>&lt;/div&gt;
+<code>k</code> captures the computation that surrounds <code>control</code> inside of <code>prompt</code>. If we don’t call <code>k</code>, that computation is lost
+&lt;div class=&#8217;bogus-wrapper&#8217;&gt;<notextile><figure class="code">&lt;figcaption&gt;<span></span>&lt;/figcaption&gt;&lt;div class=&#8221;highlight&#8221;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#8221;gutter&#8221;&gt;&lt;pre class=&#8221;line-numbers&#8221;&gt;<span class="line-number">1</span>
+<span class="line-number">2</span>
+&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#8217;code&#8217;&gt;&lt;pre&gt;<code class="ruby"><span class="line"><span class="no">DelimR</span><span class="o">.</span><span class="n">prompt</span> <span class="p">{</span> <span class="mi">1</span> <span class="o">+</span> <span class="no">DelimR</span><span class="o">.</span><span class="n">control</span> <span class="p">{</span> <span class="o">|</span><span class="n">k</span><span class="o">|</span> <span class="mi">2</span> <span class="p">}}</span>
+</span><span class="line"><span class="c1"># =&gt; 2</span>
+</span></code>&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</figure></notextile>&lt;/div&gt;
+And finally, the most exciting part,
+&lt;div class=&#8217;bogus-wrapper&#8217;&gt;<notextile><figure class="code">&lt;figcaption&gt;<span></span>&lt;/figcaption&gt;&lt;div class=&#8221;highlight&#8221;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#8221;gutter&#8221;&gt;&lt;pre class=&#8221;line-numbers&#8221;&gt;<span class="line-number">1</span>
+<span class="line-number">2</span>
+&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#8217;code&#8217;&gt;&lt;pre&gt;<code class="ruby"><span class="line"><span class="no">DelimR</span><span class="o">.</span><span class="n">prompt</span> <span class="p">{</span> <span class="mi">1</span> <span class="o">+</span> <span class="no">DelimR</span><span class="o">.</span><span class="n">control</span> <span class="p">{</span> <span class="o">|</span><span class="n">k</span><span class="o">|</span> <span class="n">k</span><span class="o">.</span><span class="n">class</span> <span class="p">}}</span>
+</span><span class="line"><span class="c1"># =&gt; Proc</span>
+</span></code>&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</figure></notextile>&lt;/div&gt;
+This is really cool! In delimited continuations, <code>k</code> is a <code>Proc</code>, which is Ruby-speak for a function. Delimited continuations are also called composable continuations, because you can <em>compose</em> <code>k</code> like any other function.</p>
+
+<p>Here’s an example:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="ruby"><span class="line"><span class="no">DelimR</span><span class="o">.</span><span class="n">prompt</span> <span class="p">{</span> <span class="mi">1</span> <span class="o">+</span> <span class="no">DelimR</span><span class="o">.</span><span class="n">control</span> <span class="p">{</span> <span class="o">|</span><span class="n">k</span><span class="o">|</span> <span class="n">k</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">k</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">k</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="mi">2</span><span class="p">)))</span> <span class="p">}</span> <span class="o">+</span> <span class="mi">7</span> <span class="p">}</span>
+</span><span class="line"><span class="c1"># =&gt; 26</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>How did 26 get there? The way to think about this is to realize that <code>k</code> captures the execution around <code>control</code>. In this case it’s <code>k = lambda { |x| 1 + x + 7}</code>. So, in the above statement </p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="ruby"><span class="line"><span class="n">k</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">k</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">k</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="mi">2</span><span class="p">)))</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">7</span><span class="p">)</span> <span class="o">+</span> <span class="mi">7</span><span class="p">)</span> <span class="o">+</span> <span class="mi">7</span> <span class="o">=</span> <span class="mi">26</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Delimited/composable continuations are really cool and powerful abstractions. Next time, I’m going to show you how to implement generators and co-routines with them!</p>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Max Veytsman</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-12T09:30:00-04:00" pubdate data-updated="true"></time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://blog.ontoillogical.com/blog/2014/07/12/delimited-continuations-in-ruby/" data-via="mveytsman" data-counturl="http://blog.ontoillogical.com/blog/2014/07/12/delimited-continuations-in-ruby/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/07/03/doorbot-overflow/" title="Previous Post: Doorbot Overflow">&laquo; Doorbot Overflow</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/07/21/delimited-continuations-in-ruby-part-2/" title="Next Post: Delimited Continuations in Ruby Part 2: Generators and Coroutines">Delimited Continuations in Ruby Part 2: Generators and Coroutines &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/10/18/solving-the-expression-problem-in-clojure/">Solving the Expression Problem in Clojure</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/28/how-to-take-over-any-java-developer/">How to take over the computer of any Java (or Clojure or Scala) developer</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/21/delimited-continuations-in-ruby-part-2/">Delimited Continuations in Ruby Part 2: Generators and Coroutines</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/12/delimited-continuations-in-ruby/">Delimited Continuations in Ruby Part 1</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/03/doorbot-overflow/">Doorbot Overflow</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  
+  <a href="https://github.com/mveytsman">@mveytsman</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'mveytsman',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Max Veytsman <br/>
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a>, customized with <a href="https://github.com/mjhea0/whiterspace">whiterspace</a>.</span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
