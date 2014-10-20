@@ -25,7 +25,7 @@ into software updates.
 
 ## Also
 I discovered a way to track the location of Tinder users by [using trigonometry](http://blog.includesecurity.com/2014/02/how-i-was-able-to-track-location-of-any.html). [Forbes](http://www.forbes.com/sites/anthonykosner/2014/02/18/tinder-dating-app-users-are-playing-with-privacy-fire/) and [Businessweek](http://www.businessweek.com/articles/2014-02-19/new-tinder-security-flaw-exposed-users-exact-locations-for-months
-) wrote about it
+) wrote about it.
 
 I organize [BSidesTO](http://bsidesto.ca), a relaxed security conference in Toronto.
 
