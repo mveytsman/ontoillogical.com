@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: securty | Ontoillogical]]></title>
+  <link href="http://blog.ontoillogical.com/blog/categories/securty/atom.xml" rel="self"/>
+  <link href="http://blog.ontoillogical.com/"/>
+  <updated>2014-10-24T13:53:49-04:00</updated>
+  <id>http://blog.ontoillogical.com/</id>
+  <author>
+    <name><![CDATA[Max Veytsman]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Doorbot Overflow]]></title>
+    <link href="http://blog.ontoillogical.com/blog/2014/07/03/doorbot-overflow/"/>
+    <updated>2014-07-03T19:21:00-04:00</updated>
+    <id>http://blog.ontoillogical.com/blog/2014/07/03/doorbot-overflow</id>
+    <content type="html"><![CDATA[<p>Today was presentation day at Hacker School. I have a 10 minute talk about “building a better doorbot” which was secretly a talk about exploiting stack buffer overflows.  People seemed to enjoy it.</p>
+
+<p>The slides are available <a href="/assets/files/doorbot_overflow.pdf">here</a>, and the source code is <a href="https://github.com/mveytsman/doorbot_overflow">here</a>.</p>
+]]></content>
+  </entry>
+  
+</feed>

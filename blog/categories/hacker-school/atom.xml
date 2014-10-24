@@ -4,7 +4,7 @@
   <title><![CDATA[Category: hacker_school | Ontoillogical]]></title>
   <link href="http://blog.ontoillogical.com/blog/categories/hacker-school/atom.xml" rel="self"/>
   <link href="http://blog.ontoillogical.com/"/>
-  <updated>2014-10-19T21:13:19-04:00</updated>
+  <updated>2014-10-24T13:53:49-04:00</updated>
   <id>http://blog.ontoillogical.com/</id>
   <author>
     <name><![CDATA[Max Veytsman]]></name>
@@ -30,13 +30,13 @@
 
 <p>The other day I started hacking on a Clojure project of mine, when I saw my firewall display this:</p>
 
-<p><img src="/assets/images/dilettante/firewall.png" width="500"></p>
+<p>{% img /assets/images/dilettante/firewall.png 500 %}</p>
 
 <p>I’m downloading clojure.jar from <a href="http://repo.maven.apache.org">http//repo.maven.apache.org</a> over port 80! This means that I’m going to be downloading JARs over unencrypted http. I thought this was an <a href="https://github.com/technomancy/leiningen/issues/1604">issue</a> with <a href="http://leiningen.org/">leiningen</a> at first. As it turns out it’s not lein’s fault at all. Clojure.jar, and a whole lot of other JARs that are important in the Java/Clojure/Scala/etc world are officially hosted on <a href="http://search.maven.org/">Maven Central</a>, which is a public service provided by <a href="http://www.sonatype.com/">Sonatype</a>. Sonatype has a policy that they only allow SSL access to people who have authentication tokens. <strong>In order to get an authentication token and SSL access, you need to donate $10 to the Apache foundation.</strong> If you don’t believe me, the donate page is <a href="http://www.sonatype.com/clm/secure-access-to-central">here</a>, and the blog post announcing this policy is <a href="http://www.sonatype.com/clm/secure-access-to-central">here</a>. They even mention man-in-the-middle attacks on it.</p>
 
 <p>Because authentication tokens are issued per user/organization, tools like maven and leiningen can’t bundle authentication tokens. If you’re pulling down some Java project and installing its dependencies, you’re not going over SSL. This policy was confirmed by a Sonatype employee when I got into a twitter tiff about this:</p>
 
-<p><img src="/assets/images/dilettante/tweet.png" width="500"></p>
+<p>{% img /assets/images/dilettante/tweet.png 500 %}</p>
 
 <p>Unless you take very careful steps that involve paying someone $10, JARs you download can be man-in-the-middled, and code you execute on your system can be replaced by malware.</p>
 
@@ -48,11 +48,11 @@
 
 <p>Proxying HTTP traffic through dilettante will backdoor any JARs downloaded from maven central. The backdoored version will retain their functionality, but display a nice message to the user when they use the library. You can see the video below:</p>
 
-<p><video width='' height='' preload='none' controls poster=''><source src='http://blog.ontoillogical.com/assets/files/dilettante_screencast.mp4' type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'></video></p>
+<p>{% video  http://blog.ontoillogical.com/assets/files/dilettante_screencast.mp4 800 %}</p>
 
 <p>Or a screenshot:</p>
 
-<p><img src="/assets/images/dilettante/screen.png" width="800"></p>
+<p>{% img /assets/images/dilettante/screen.png 800 %}</p>
 
 <p>You can find the code <a href="https://github.com/mveytsman/dilettante">here</a></p>
 
@@ -112,6 +112,413 @@ static {
     <p>If a user is downloading multiple JARs in one go, we will backdoor each one. The malicious payload is executed only once per JAR, but if multiple JARs are backdoored, we will execute it several times. This issue will disappear if we replace the cat picture with a high quality persistent backdoor that is smart enough to only infect a system once :).</p>
   </li>
 </ol>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Delimited Continuations in Ruby Part 2: Generators and Coroutines]]></title>
+    <link href="http://blog.ontoillogical.com/blog/2014/07/21/delimited-continuations-in-ruby-part-2/"/>
+    <updated>2014-07-21T03:00:00-04:00</updated>
+    <id>http://blog.ontoillogical.com/blog/2014/07/21/delimited-continuations-in-ruby-part-2</id>
+    <content type="html"><![CDATA[<p>Last <a href="http://blog.ontoillogical.com/blog/2014/07/12/delimited-continuations-in-ruby/">time</a>, I showed some basic things you can do with delimited continuations. If you’re still confused about them (as I am!) another good tutorial is <a href="http://community.schemewiki.org/?composable-continuations-tutorial">here</a>.</p>
+
+<p>Let’s dive right in and build some more complicated control structures!</p>
+
+<h2 id="generators">Generators</h2>
+
+<p>Let’s start by building what Python calls “Generators.” Ruby has Enumerators, which are pretty similar, but I’ll call it a generator in order to differentiate my implementation from the Ruby core.</p>
+
+<p>Here’s the code I want to write
+<code>ruby
+counter = Generator.new do |g| 
+  ctr = 0
+  while true
+    g.yield(ctr)
+    ctr += 1
+  end
+end
+</code>
+Then I use it like so</p>
+
+<p><code>ruby
+counter.next
+# =&gt; 0
+counter.next
+# =&gt; 1
+counter.next
+# =&gt; 2
+# ...
+</code></p>
+
+<p>Using delimited continuations to build a generator is pretty straight-forward. Our constructor will get a block and surround it with a <code>prompt</code> to delimit a continuation. Yielding adds the yielded value into an internal queue, and uses <code>control</code> to capture a continuation. When we call that continuation, we will execute the code around the control, which is precisely like entering at where we called yield. Getting the next value of our generator pops a result off the queue and invokes the saved continuation.</p>
+
+<p>The annotated code is below.</p>
+
+<p>&#8220;`
+class Generator
+  def initialize(&amp;block)
+    # @results will be used to save values yielded by our generator
+    @results = []
+    # Calling the block is wrapped in a prompt in order to enclose it in a continuation
+    DelimR.prompt do
+      # The block is passed self, so that it can call the yield method defined below
+      block.call(self)
+    end
+  end</p>
+
+<p>def yield(result)
+    # The yield method saves the result it receives, and saves the continuation in @next
+    @results « result
+    DelimR.control do |k| 
+      @next = k
+    end
+  end
+  def next
+    # @result is used as a FIFO queue of yielded values
+    r = @results.shift</p>
+
+<pre><code># an empty @results means that no more values have been yielded
+if r.nil?
+  raise "Iterator finished"
+end
+
+# This invokes the saved continuation, not passing it any values
+@next.call(nil)
+
+# return the saved @result that was shifted off the bottom of the queue
+r   end end ```
+</code></pre>
+
+<h2 id="coroutines">Coroutines</h2>
+
+<p>Coroutines, also known as Fibers in ruby-land, are subroutines that can suspend their execution, to be resumed at a later point. They are very useful as a lightweight thread-like construct. They are very similar to generators, and can actually be implemented in terms of <a href="http://legacy.python.org/dev/peps/pep-0342/">them</a>. Besides being useful for asynchronous tasks, <a href="http://eli.thegreenplace.net/2009/08/29/co-routines-as-an-alternative-to-state-machines/">“Co-routines are to state machines what recursion is to stacks”</a>. </p>
+
+<p>We can can modify our <code>Generator</code> class to be a coroutine by renaming <code>next</code> to <code>send</code> and allowing data to be passed into it, so <code>foo = c.yield</code> will alssign whatever is sent to the coroutine to <code>foo</code> when execution resumes.</p>
+
+<p>&#8220;`ruby
+class Coroutine
+  # initialize and yield are the same as for Generator
+  def send(value=nil)
+    # @result is used as a FIFO queue of yielded values
+    r = @results.shift</p>
+
+<pre><code># an empty @results means that no more values have been yielded
+if r.nil?
+  raise "Iterator finished"
+end
+
+# This invokes the saved continuation, not passing it any values
+@next.call(value)
+
+# return the saved @result that was shifted off the bottom of the queue
+r   end end ```
+</code></pre>
+
+<p>Here’s an implementation of the parsing example from Eli Bendersky’s blog <a href="http://eli.thegreenplace.net/2009/08/29/co-routines-as-an-alternative-to-state-machines/">post</a> using the Coroutine class defined above.</p>
+
+<p>&#8220;`ruby
+def hex_encode(str)
+  str.split(//).map{ |x| x.ord.to_s(16) }.join
+end</p>
+
+<p>frame_receiver = Coroutine.new do |c| 
+  while true
+    frame = (c.yield(true))
+    puts ‘Got frame:’, hex_encode(frame)
+  end
+end</p>
+
+<p>unwrap_protocol = Coroutine.new do |c| 
+  header = “\x61”
+  footer = “\x62”
+  dle = “\xAB”
+  after_dle_func = lambda { |x| x }
+  target = frame_receiver
+  # Outer loop looking for a frame header
+  #
+  while true
+    byte = (c.yield(true))
+    frame = ‘’</p>
+
+<pre><code>if byte == header
+  # Capture the full frame
+  #
+  while true
+   
+    byte = (c.yield(true))
+    
+    if byte == footer
+
+      target.send(frame)
+      break
+    elsif byte == dle
+      byte = (c.yield(true))
+      frame += after_dle_func.call(byte)
+    else
+      frame += byte
+    end
+  end
+end   end end
+</code></pre>
+
+<p>bytes = [0x70, 0x24,
+         0x61, 0x99, 0xAF, 0xD1, 0x62,
+         0x56, 0x62,
+         0x61, 0xAB, 0xAB, 0x14, 0x62,
+         0x7
+        ].map(&amp;:chr)</p>
+
+<p>bytes.each do |byte|
+  unwrap_protocol.send(byte)
+end</p>
+
+<h1 id="got-frame">Got frame:</h1>
+<p># 99afd1
+# Got frame:
+# ab14
+&#8220;`</p>
+
+<h2 id="final-thoughts">Final thoughts</h2>
+
+<p>Once I had prompt/control, I found implementing generators and coroutines pretty straightforward. I think that prompt/control are easier to reason about then non-delimited continuations. One piece of evidence that I have for this is that Ruby’s <a href="https://github.com/ruby/ruby/blob/ruby_1_8_7/lib/generator.rb">implementation</a> of generators using non-delimited continuations is harder (for me) to understand then the one above using delimited continuations.</p>
+
+<p>Either way, having an abstraction that allows you to implement new control structures is really cool and empowering. For instance, this <a href="http://www.ccs.neu.edu/racket/pubs/pldi93-sitaram.pdf">paper</a> uses delimited continuations to implement Prolog-like backtracking!</p>
+
+<p>There are still many things I don’t understand about continuations, a partial list is below</p>
+
+<ol>
+  <li>There is a difference between prompt/control and reset/shift. I don’t know what it is.</li>
+  <li>I don’t entirely understand what <code>@@keep_delimiter_upon_effect</code> does in https://github.com/mveytsman/DelimR/blob/master/lib/delimr.rb</li>
+  <li>In the generator example, why doesn’t the line <code>ctr=0</code> get executed on every iteration?</li>
+  <li>I actually implemented semi-coroutines. For full coroutines I need to be able to transfer exeution between them. My instricnt is that I can do this by calling resume on the target coroutine, but seeing this in the Ruby Fiber documentation makes me think there is something non-trivial I don’t understand here:
+&gt; You cannot resume a fiber that transferred control to another one. This will cause a double resume error. You need to transfer control back to this fiber before it can yield and resume.</li>
+</ol>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Delimited Continuations in Ruby Part 1]]></title>
+    <link href="http://blog.ontoillogical.com/blog/2014/07/12/delimited-continuations-in-ruby/"/>
+    <updated>2014-07-12T09:30:00-04:00</updated>
+    <id>http://blog.ontoillogical.com/blog/2014/07/12/delimited-continuations-in-ruby</id>
+    <content type="html"><![CDATA[<p>For the past few days at Hacker School, I’ve been exploring continuations. Continuations are hard to describe. Basically, a continuation represents the execution state of a program at a point. Capturing the continuation and invoking it later allows you to come back to that point in the programs execution. Continuations can be used to implement complicated control flow constructs.</p>
+
+<p>If that was complicated, here’s a sandwich metaphor from <a href="https://groups.google.com/forum/#!msg/perl.perl6.language/-KFNPaLL2yE/_RzO8Fenz7AJ">Luke Palmer</a>:</p>
+
+<blockquote>
+  <p>Say you’re in the kitchen in front of the refrigerator, thinking about a sandwich. You take a continuation right there and stick it in your pocket. Then you get some turkey and bread out of the refrigerator and make yourself a sandwich, which is now sitting on the counter. You invoke the continuation in your pocket, and you find yourself standing in front of the refrigerator again, thinking about a sandwich. But fortunately, there’s a sandwich on the counter, and all the materials used to make it are gone. So you eat it. :-)</p>
+</blockquote>
+
+<p>Another way to put it: a captured continuation is a label, and to invoke it is to GOTO.</p>
+
+<h2 id="the-basics">The Basics</h2>
+
+<p>On that note, let’s start by building a simple GOTO.</p>
+
+<p>In Ruby, you need to <code>require 'continuation'</code> to enable continuations. <code>callcc</code> takes a block, and passes it the current continuation as parameter. That continuation can be invoked later.</p>
+
+<p>&#8220;`ruby
+require ‘continuation’
+$labels = {}</p>
+
+<p>def label(label_name)
+  callcc { |continuation|   $labels[label_name] = continuation }
+end</p>
+
+<p>def goto(label_name)
+  unless $labels.has_key? label_name
+    raise “No label #{label_name}”
+  end
+  $labels[label_name].call
+end
+&#8220;`</p>
+
+<p>We can then build a for loop</p>
+
+<p><code>ruby
+i = 1
+puts "entering loop"
+label "loop"
+if i &lt; 10
+  puts i
+  i += 1
+  goto "loop"
+end
+puts "loop done"
+puts "i is #{i}"
+</code></p>
+
+<p>We can even build a reverse GOTO (known as the COMEFROM, implementation courtesy of <a href="https://en.wikipedia.org/wiki/COMEFROM#Practical_uses">Wikipedia</a>).</p>
+
+<p>&#8220;`
+$come_from_labels = {}</p>
+
+<p>def label(l)
+    if $come_from_labels[l]
+        $come_from_labels[l].call
+    end
+end</p>
+
+<p>def come_from(l)
+    callcc do |block|
+        $come_from_labels[l] = block
+    end
+end
+&#8220;`</p>
+
+<h2 id="problems-abound">Problems Abound</h2>
+
+<p>You can implement pretty much any control flow you want with continuations, but it may be <a href="http://okmij.org/ftp/continuations/against-callcc.html#traps">hairy</a>.</p>
+
+<p>To give an example of the kind of problems you face when working with traditional continuations, here’s a bug I ran into when writing the GOTO example above. My orginal code for <code>label</code> looked like this: </p>
+
+<p><code>ruby
+def label(label_name)
+   $labels[label_name] = callcc { |continuation| continuation }
+end
+</code></p>
+
+<p>Running it, I got the following output:</p>
+
+<p><code>
+entering loop
+1
+2
+goto.rb:15:in `goto': undefined method `call' for nil:NilClass (NoMethodError)
+	from goto.rb:27:in `&lt;main&gt;'
+</code></p>
+
+<p>Can you guess the issue? When <code>goto</code> was called, it returned to the place where <code>callcc</code> was called. That means that whatever was passed to the continuation would now be assigned to <code>$labels[label_name]</code>. We didn’t pass anything to the continuation, and so <code>$labels[label_name]</code> becomes <code>nil</code>.</p>
+
+<p>To further illustrate the point:</p>
+
+<p><code>ruby
+$continuation = callcc { |continuation| continuation }
+puts "$continuation is #{$continuation}"
+# "$continuation is #&lt;Continuation:0x007fbbaa0193f8&gt;"
+$continuation.call("hello world")
+puts "$continuation is #{$continuation}"
+# "$continuation is hello world"
+</code></p>
+
+<p>It seems like it would be convent to separate the concept of shifting control from the place we want to return to.</p>
+
+<h2 id="enter-delmited-continuations">Enter delmited continuations</h2>
+
+<p><a href="https://en.wikipedia.org/wiki/Delimited_continuation">Delimited continuations</a> are way of capturing a fixed slice of computation instead of the unlimited computation captured by a regular continuation.</p>
+
+<p>I wrote a little library called <a href="https://github.com/mveytsman/delimr">DelimR</a> that implemnts delimited continuations for ruby by using the native <code>callcc</code> construct. I made a direct port of Oleg Kiselyov’s scheme <a href="http://okmij.org/ftp/continuations/implementations.html#delimcc-scheme">implementation</a>. In an inversion of Knuth’s famous <a href="http://staff.science.uva.nl/~peter/knuthnote.pdf">line</a>, the code seems to work, but I don’t understand it.</p>
+
+<p>Delimited continuations have two operations. <code>prompt</code> marks a continuation, when the continuation is invoked, it will return to where prompt was called. <code>control</code> allows us to capture the continuation.</p>
+
+<p>It’s best to demonstrate this with some examples. <code>prompt</code> on it’s own is a no-op.
+<code>ruby
+DelimR.prompt { 123 }
+# =&gt; 123
+</code>
+Inside of <code>prompt</code>, you can call <code>control</code>, and pass it a block that receives a continuation as an argument
+<code>ruby
+DelimR.prompt { 1 + DelimR.control { |k| k.call(2) }}
+# =&gt; 3
+</code>
+<code>k</code> captures the computation that surrounds <code>control</code> inside of <code>prompt</code>. If we don’t call <code>k</code>, that computation is lost
+<code>ruby
+DelimR.prompt { 1 + DelimR.control { |k| 2 }}
+# =&gt; 2
+</code>
+And finally, the most exciting part,
+<code>ruby
+DelimR.prompt { 1 + DelimR.control { |k| k.class }}
+# =&gt; Proc
+</code>
+This is really cool! In delimited continuations, <code>k</code> is a <code>Proc</code>, which is Ruby-speak for a function. Delimited continuations are also called composable continuations, because you can <em>compose</em> <code>k</code> like any other function.</p>
+
+<p>Here’s an example:</p>
+
+<p><code>ruby
+DelimR.prompt { 1 + DelimR.control { |k| k.call(k.call(k.call(2))) } + 7 }
+# =&gt; 26
+</code></p>
+
+<p>How did 26 get there? The way to think about this is to realize that <code>k</code> captures the execution around <code>control</code>. In this case it’s <code>k = lambda { |x| 1 + x + 7}</code>. So, in the above statement </p>
+
+<p><code>ruby
+k.call(k.call(k.call(2))) = 1 + (1 + (1 + (2) + 7) + 7) + 7 = 26
+</code></p>
+
+<p>Delimited/composable continuations are really cool and powerful abstractions. Next time, I’m going to show you how to implement generators and co-routines with them!</p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Doorbot Overflow]]></title>
+    <link href="http://blog.ontoillogical.com/blog/2014/07/03/doorbot-overflow/"/>
+    <updated>2014-07-03T19:21:00-04:00</updated>
+    <id>http://blog.ontoillogical.com/blog/2014/07/03/doorbot-overflow</id>
+    <content type="html"><![CDATA[<p>Today was presentation day at Hacker School. I have a 10 minute talk about “building a better doorbot” which was secretly a talk about exploiting stack buffer overflows.  People seemed to enjoy it.</p>
+
+<p>The slides are available <a href="/assets/files/doorbot_overflow.pdf">here</a>, and the source code is <a href="https://github.com/mveytsman/doorbot_overflow">here</a>.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Hacker School: The First Three Weeks]]></title>
+    <link href="http://blog.ontoillogical.com/blog/2014/06/29/hacker-school-the-first-three-weeks/"/>
+    <updated>2014-06-29T19:30:00-04:00</updated>
+    <id>http://blog.ontoillogical.com/blog/2014/06/29/hacker-school-the-first-three-weeks</id>
+    <content type="html"><![CDATA[<p>For three weeks now, I’ve been at
+<a href="http://hackerschool.com">Hacker School</a>. Hacker School is hard to
+describe, they call themselves a “writer’s retreat for programmers.”
+Personally I prefer “programmer summer camp,” mostly because I have no
+idea what writer’s retreats are like. Basically it’s a collection of
+people working in a self-directed way to improve their skills as
+programmers. They accept people of all skill levels, as long as you
+have programmed before.  I’ve heard “but Max, you already know Ruby on
+Rails” from more then one person when telling them I’m going to Hacker
+School, so I think I should let you know that Hacker School doesn’t
+have a curriculum, isn’t a bootcamp, and I’m trying to write as little
+Ruby as I can get away while here.</p>
+
+<p>I have a lot to say about what it feels like to go to a Montessori
+school for adults, but I’ll save that for another blog post. This is
+going to be a inventory of what I’ve been working and thinking about
+while here, and some of my goals. One of my goals coming in was to
+blog a lot. I haven’t done it, but I hope this will the first of n
+Hacker School blog posts (for sufficiently large n).</p>
+
+<h2 id="what-im-doing">What I’m Doing</h2>
+
+<p>I’ve started a lot of projects while here, but they fall into two main categories. Courses and Projects.</p>
+
+<h3 id="courses">Courses</h3>
+<ul>
+  <li>I started <a href="https://en.wikibooks.org/wiki/Write_Yourself_a_Scheme_in_48_Hours">Write Yourself a Scheme in 48 Hours</a> with another Hacker Schooler <a href="https://github.com/mveytsman/scheme48">here</a>. I’m finding that I’m not getting a lot of out of it — I’m running into a lot of issues that would be solved with a more traditional Haskell resource, so to that end,</li>
+  <li>I started Yorgey’s Haskell <a href="http://www.cis.upenn.edu/~cis194/">course</a> <a href="https://github.com/mveytsman/scheme48">here</a></li>
+  <li>I started working through this <a href="http://www.trailofbits.com/training/assured_exploitation/">exploitation</a> course.</li>
+  <li>I signed up for Dan Boneh’s <a href="https://www.coursera.org/course/crypto">crypto</a> course which starts tomorrow.</li>
+</ul>
+
+<p>This above is very ambitious, and I fully expect to not finish most of these. I’m pretty sure I’m not going to come back to the Haskell Scheme interpreter course. I would like to finish the Haskell and exploitation class. I’ve started the crypto class many times before already, so there’s that.</p>
+
+<h3 id="projects">Projects</h3>
+<ul>
+  <li>To prove to myself just how much better I understand Ruby then Haskell, I wrote a very simple <a href="https://github.com/mveytsman/rubbyskeme">Scheme interpreter</a> based on Norvig’s <a href="http://norvig.com/lispy.html">lispy</a></li>
+  <li>My main project so far is implementing an <a href="https://github.com/mveytsman/emm-ess-pee">emulator</a> for the <a href="https://en.wikipedia.org/wiki/TI_MSP430">MSP430</a> in clojure.</li>
+</ul>
+
+<h3 id="emulator">Emulator</h3>
+<p>The emulator project has been taking up most of my time here, and it’s worth talking about it more. The MSP430 is the chipset
+used in the <a href="https://microcorruption.com/">MicroCorruption</a> hacking
+game. Working on the emulator has helped me get better at reversing the MIPS assembly used by the processor, and I finally got to the last <a href="https://microcorruption.com/profile/96">level</a> after a 5 month hiatus.</p>
+
+<p>I have two directions I want to take this emulator in. First of all, I have started reading <a href="https://www.usenix.org/system/files/conference/woot12/woot12-final26.pdf">papers</a> about using <a href="https://en.wikipedia.org/wiki/Satisfiability_Modulo_Theories">SMT solvers</a> in binary reverse engineering and exploitation. I would like to develop some heuristics for solving the microcorruption challenges automatically. Since I already have an emulator, the next step would be to emit SMT formulas based on execution traces. I don’t actually understand how to solve the problem deeper then the above sentence, so the real next step is to read more papers.</p>
+
+<p>The other direction I have been thinking about is to port my emulator from Clojure into Clojurescript and build a web-based UI around it. The microcorruption game has a web based emulator, but the emulation actually happens on a sever and the browser provides only the UI. I have this vague idea of using colors to map display bytes in memory and show a buffer overflow as mixing colors. That’s about all I got though, but it’s a good excuse to learn <a href="https://github.com/swannodette/om">Om</a>.</p>
+
+<h2 id="future-posts">Future posts</h2>
+<p>Next time I’ll explain how the biggest lesson I learned from writing a emulator in a functional programming style was about testing and talk about writing my first (!) clojure macros.</p>
+
 ]]></content>
   </entry>
   
