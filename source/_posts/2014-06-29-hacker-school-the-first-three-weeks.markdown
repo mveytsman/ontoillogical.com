@@ -3,7 +3,7 @@ layout: post
 title: "Hacker School: The First Three Weeks"
 date: 2014-06-29 19:30
 comments: true
-categories: 
+categories: hacker_school
 ---
 
 For three weeks now, I've been at

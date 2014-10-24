@@ -3,7 +3,7 @@ layout: post
 title: "Delimited Continuations in Ruby Part 1"
 date: 2014-07-12 09:30
 comments: true
-categories: 
+categories: hacker_school
 ---
 
 For the past few days at Hacker School, I've been exploring continuations. Continuations are hard to describe. Basically, a continuation represents the execution state of a program at a point. Capturing the continuation and invoking it later allows you to come back to that point in the programs execution. Continuations can be used to implement complicated control flow constructs.

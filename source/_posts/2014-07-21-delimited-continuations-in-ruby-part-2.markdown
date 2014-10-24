@@ -3,7 +3,7 @@ layout: post
 title: "Delimited Continuations in Ruby Part 2: Generators and Coroutines"
 date: 2014-07-21 02:00:00 -0500
 comments: true
-categories:
+categories: hacker_school
 published: true
 ---
 
