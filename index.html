@@ -1064,7 +1064,8 @@ Then I use it like so</p>
 
 <p>We can even build a reverse GOTO (known as the COMEFROM, implementation courtesy of <a href="https://en.wikipedia.org/wiki/COMEFROM#Practical_uses">Wikipedia</a>).</p>
 
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>ruby </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
 <span class="line-number">2</span>
 <span class="line-number">3</span>
 <span class="line-number">4</span>
@@ -1077,20 +1078,19 @@ Then I use it like so</p>
 <span class="line-number">11</span>
 <span class="line-number">12</span>
 <span class="line-number">13</span>
-</pre></td><td class="code"><pre><code class="ruby"><span class="line"><span class="vg">$come_from_labels</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span class="line">
-</span><span class="line"><span class="k">def</span> <span class="nf">label</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
-</span><span class="line">    <span class="k">if</span> <span class="vg">$come_from_labels</span><span class="o">[</span><span class="n">l</span><span class="o">]</span>
-</span><span class="line">        <span class="vg">$come_from_labels</span><span class="o">[</span><span class="n">l</span><span class="o">].</span><span class="n">call</span>
-</span><span class="line">    <span class="k">end</span>
-</span><span class="line"><span class="k">end</span>
-</span><span class="line">
-</span><span class="line"><span class="k">def</span> <span class="nf">come_from</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
-</span><span class="line">    <span class="nb">callcc</span> <span class="k">do</span> <span class="o">|</span><span class="n">block</span><span class="o">|</span>
-</span><span class="line">        <span class="vg">$come_from_labels</span><span class="o">[</span><span class="n">l</span><span class="o">]</span> <span class="o">=</span> <span class="n">block</span>
-</span><span class="line">    <span class="k">end</span>
-</span><span class="line"><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+</pre></td><td class="code"><pre><code class=""><span class="line">$come_from_labels = {}
+</span><span class="line"> 
+</span><span class="line">def label(l)
+</span><span class="line">    if $come_from_labels[l]
+</span><span class="line">        $come_from_labels[l].call
+</span><span class="line">    end
+</span><span class="line">end
+</span><span class="line"> 
+</span><span class="line">def come_from(l)
+</span><span class="line">    callcc do |block|
+</span><span class="line">        $come_from_labels[l] = block
+</span><span class="line">    end
+</span><span class="line">end</span></code></pre></td></tr></table></div></figure></notextile></div>
 
 <h2 id="problems-abound">Problems Abound</h2>
 

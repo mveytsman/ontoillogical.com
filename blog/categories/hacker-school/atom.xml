@@ -4,7 +4,7 @@
   <title><![CDATA[Category: hacker_school | Ontoillogical]]></title>
   <link href="http://blog.ontoillogical.com/blog/categories/hacker-school/atom.xml" rel="self"/>
   <link href="http://blog.ontoillogical.com/"/>
-  <updated>2014-10-24T13:53:49-04:00</updated>
+  <updated>2014-10-24T13:57:40-04:00</updated>
   <id>http://blog.ontoillogical.com/</id>
   <author>
     <name><![CDATA[Max Veytsman]]></name>
@@ -30,13 +30,13 @@
 
 <p>The other day I started hacking on a Clojure project of mine, when I saw my firewall display this:</p>
 
-<p>{% img /assets/images/dilettante/firewall.png 500 %}</p>
+<p><img src="/assets/images/dilettante/firewall.png" width="500"></p>
 
 <p>I’m downloading clojure.jar from <a href="http://repo.maven.apache.org">http//repo.maven.apache.org</a> over port 80! This means that I’m going to be downloading JARs over unencrypted http. I thought this was an <a href="https://github.com/technomancy/leiningen/issues/1604">issue</a> with <a href="http://leiningen.org/">leiningen</a> at first. As it turns out it’s not lein’s fault at all. Clojure.jar, and a whole lot of other JARs that are important in the Java/Clojure/Scala/etc world are officially hosted on <a href="http://search.maven.org/">Maven Central</a>, which is a public service provided by <a href="http://www.sonatype.com/">Sonatype</a>. Sonatype has a policy that they only allow SSL access to people who have authentication tokens. <strong>In order to get an authentication token and SSL access, you need to donate $10 to the Apache foundation.</strong> If you don’t believe me, the donate page is <a href="http://www.sonatype.com/clm/secure-access-to-central">here</a>, and the blog post announcing this policy is <a href="http://www.sonatype.com/clm/secure-access-to-central">here</a>. They even mention man-in-the-middle attacks on it.</p>
 
 <p>Because authentication tokens are issued per user/organization, tools like maven and leiningen can’t bundle authentication tokens. If you’re pulling down some Java project and installing its dependencies, you’re not going over SSL. This policy was confirmed by a Sonatype employee when I got into a twitter tiff about this:</p>
 
-<p>{% img /assets/images/dilettante/tweet.png 500 %}</p>
+<p><img src="/assets/images/dilettante/tweet.png" width="500"></p>
 
 <p>Unless you take very careful steps that involve paying someone $10, JARs you download can be man-in-the-middled, and code you execute on your system can be replaced by malware.</p>
 
@@ -48,11 +48,11 @@
 
 <p>Proxying HTTP traffic through dilettante will backdoor any JARs downloaded from maven central. The backdoored version will retain their functionality, but display a nice message to the user when they use the library. You can see the video below:</p>
 
-<p>{% video  http://blog.ontoillogical.com/assets/files/dilettante_screencast.mp4 800 %}</p>
+<p><video width='' height='' preload='none' controls poster=''><source src='http://blog.ontoillogical.com/assets/files/dilettante_screencast.mp4' type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'></video></p>
 
 <p>Or a screenshot:</p>
 
-<p>{% img /assets/images/dilettante/screen.png 800 %}</p>
+<p><img src="/assets/images/dilettante/screen.png" width="800"></p>
 
 <p>You can find the code <a href="https://github.com/mveytsman/dilettante">here</a></p>
 
@@ -72,211 +72,412 @@ package dilettante;</p>
         // do some evil stuff
     }
 }
-&#8220;`
-The trick is finding a way to call my malicious class. I know that my victim will be downloading some library, and I need to run my malicious code regardless of what classes in the library they actually use. I would also like to actual functionality of the library to not be affected.</p>
-
-<p>Java has the concept of static class blocks, which are class level initializers — that is, they contain code that is run once when the class (not an instance!) is loaded into memory. After I insert a malicious class file into the jar, I can call it in a static block like this:</p>
-
-<p><code>java
-import dilettante.*;
-static {
-    Dilettante.backdoor();
-}
-</code></p>
-
-<p>In order to inject the above snippet, I need to inject it into Java classes directly, not source files. I use <a href="https://github.com/Storyyeller/Krakatau">Krakatau</a>, a Java disassembler/assembler library for Python. It let’s me add the snippet in <a href="http://jasmin.sourceforge.net/">Jasmin</a> format:</p>
-
-<p><code>
-.method static &lt;clinit&gt; : ()V
-  ; method code size: 4 bytes
-  .limit stack 0
-  .limit locals 0
-  invokestatic dilettante/Dilettante backdoor ()V
-  return
-.end method
-</code></p>
-
-<h2 id="limitations">Limitations</h2>
-<p>This is a proof of concept!, and so it still has some limitations</p>
-
-<ol>
-  <li>
-    <p>Currently it’s not very fast. There are a couple of reasons for this</p>
-
-    <ul>
-      <li>I have to run a disassemble and an assemble step. It would be more efficient to directly append the assembled shim to the .class file.</li>
-      <li>The way I am using Python’s zipfile library, I’m actually creating a second copy of every class in the zip. This is inefficient in terms of space and speed. Careful reading of the zip spec may lead to an efficient way of appending data to files inside a zip.</li>
-    </ul>
-  </li>
-  <li>
-    <p>If a user is downloading multiple JARs in one go, we will backdoor each one. The malicious payload is executed only once per JAR, but if multiple JARs are backdoored, we will execute it several times. This issue will disappear if we replace the cat picture with a high quality persistent backdoor that is smart enough to only infect a system once :).</p>
-  </li>
-</ol>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Delimited Continuations in Ruby Part 2: Generators and Coroutines]]></title>
-    <link href="http://blog.ontoillogical.com/blog/2014/07/21/delimited-continuations-in-ruby-part-2/"/>
-    <updated>2014-07-21T03:00:00-04:00</updated>
-    <id>http://blog.ontoillogical.com/blog/2014/07/21/delimited-continuations-in-ruby-part-2</id>
-    <content type="html"><![CDATA[<p>Last <a href="http://blog.ontoillogical.com/blog/2014/07/12/delimited-continuations-in-ruby/">time</a>, I showed some basic things you can do with delimited continuations. If you’re still confused about them (as I am!) another good tutorial is <a href="http://community.schemewiki.org/?composable-continuations-tutorial">here</a>.</p>
-
-<p>Let’s dive right in and build some more complicated control structures!</p>
-
-<h2 id="generators">Generators</h2>
-
-<p>Let’s start by building what Python calls “Generators.” Ruby has Enumerators, which are pretty similar, but I’ll call it a generator in order to differentiate my implementation from the Ruby core.</p>
-
-<p>Here’s the code I want to write
-<code>ruby
-counter = Generator.new do |g| 
-  ctr = 0
-  while true
-    g.yield(ctr)
-    ctr += 1
-  end
-end
-</code>
-Then I use it like so</p>
-
-<p><code>ruby
-counter.next
-# =&gt; 0
-counter.next
-# =&gt; 1
-counter.next
-# =&gt; 2
-# ...
-</code></p>
-
-<p>Using delimited continuations to build a generator is pretty straight-forward. Our constructor will get a block and surround it with a <code>prompt</code> to delimit a continuation. Yielding adds the yielded value into an internal queue, and uses <code>control</code> to capture a continuation. When we call that continuation, we will execute the code around the control, which is precisely like entering at where we called yield. Getting the next value of our generator pops a result off the queue and invokes the saved continuation.</p>
-
-<p>The annotated code is below.</p>
-
-<p>&#8220;`
-class Generator
-  def initialize(&amp;block)
-    # @results will be used to save values yielded by our generator
-    @results = []
-    # Calling the block is wrapped in a prompt in order to enclose it in a continuation
-    DelimR.prompt do
-      # The block is passed self, so that it can call the yield method defined below
-      block.call(self)
-    end
-  end</p>
-
-<p>def yield(result)
-    # The yield method saves the result it receives, and saves the continuation in @next
-    @results « result
-    DelimR.control do |k| 
-      @next = k
-    end
-  end
-  def next
-    # @result is used as a FIFO queue of yielded values
-    r = @results.shift</p>
-
-<pre><code># an empty @results means that no more values have been yielded
-if r.nil?
-  raise "Iterator finished"
-end
-
-# This invokes the saved continuation, not passing it any values
-@next.call(nil)
-
-# return the saved @result that was shifted off the bottom of the queue
-r   end end ```
-</code></pre>
-
-<h2 id="coroutines">Coroutines</h2>
-
-<p>Coroutines, also known as Fibers in ruby-land, are subroutines that can suspend their execution, to be resumed at a later point. They are very useful as a lightweight thread-like construct. They are very similar to generators, and can actually be implemented in terms of <a href="http://legacy.python.org/dev/peps/pep-0342/">them</a>. Besides being useful for asynchronous tasks, <a href="http://eli.thegreenplace.net/2009/08/29/co-routines-as-an-alternative-to-state-machines/">“Co-routines are to state machines what recursion is to stacks”</a>. </p>
-
-<p>We can can modify our <code>Generator</code> class to be a coroutine by renaming <code>next</code> to <code>send</code> and allowing data to be passed into it, so <code>foo = c.yield</code> will alssign whatever is sent to the coroutine to <code>foo</code> when execution resumes.</p>
-
-<p>&#8220;`ruby
-class Coroutine
-  # initialize and yield are the same as for Generator
-  def send(value=nil)
-    # @result is used as a FIFO queue of yielded values
-    r = @results.shift</p>
-
-<pre><code># an empty @results means that no more values have been yielded
-if r.nil?
-  raise "Iterator finished"
-end
-
-# This invokes the saved continuation, not passing it any values
-@next.call(value)
-
-# return the saved @result that was shifted off the bottom of the queue
-r   end end ```
-</code></pre>
-
-<p>Here’s an implementation of the parsing example from Eli Bendersky’s blog <a href="http://eli.thegreenplace.net/2009/08/29/co-routines-as-an-alternative-to-state-machines/">post</a> using the Coroutine class defined above.</p>
-
-<p>&#8220;`ruby
-def hex_encode(str)
-  str.split(//).map{ |x| x.ord.to_s(16) }.join
-end</p>
-
-<p>frame_receiver = Coroutine.new do |c| 
-  while true
-    frame = (c.yield(true))
-    puts ‘Got frame:’, hex_encode(frame)
-  end
-end</p>
-
-<p>unwrap_protocol = Coroutine.new do |c| 
-  header = “\x61”
-  footer = “\x62”
-  dle = “\xAB”
-  after_dle_func = lambda { |x| x }
-  target = frame_receiver
-  # Outer loop looking for a frame header
-  #
-  while true
-    byte = (c.yield(true))
-    frame = ‘’</p>
-
-<pre><code>if byte == header
-  # Capture the full frame
-  #
-  while true
-   
-    byte = (c.yield(true))
-    
-    if byte == footer
-
-      target.send(frame)
-      break
-    elsif byte == dle
-      byte = (c.yield(true))
-      frame += after_dle_func.call(byte)
-    else
-      frame += byte
-    end
-  end
-end   end end
-</code></pre>
-
-<p>bytes = [0x70, 0x24,
-         0x61, 0x99, 0xAF, 0xD1, 0x62,
-         0x56, 0x62,
-         0x61, 0xAB, 0xAB, 0x14, 0x62,
-         0x7
-        ].map(&amp;:chr)</p>
-
-<p>bytes.each do |byte|
-  unwrap_protocol.send(byte)
-end</p>
-
-<h1 id="got-frame">Got frame:</h1>
-<p># 99afd1
-# Got frame:
-# ab14
-&#8220;`</p>
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+<span class='line-number'>100</span>
+<span class='line-number'>101</span>
+<span class='line-number'>102</span>
+<span class='line-number'>103</span>
+<span class='line-number'>104</span>
+<span class='line-number'>105</span>
+<span class='line-number'>106</span>
+<span class='line-number'>107</span>
+<span class='line-number'>108</span>
+<span class='line-number'>109</span>
+<span class='line-number'>110</span>
+<span class='line-number'>111</span>
+<span class='line-number'>112</span>
+<span class='line-number'>113</span>
+<span class='line-number'>114</span>
+<span class='line-number'>115</span>
+<span class='line-number'>116</span>
+<span class='line-number'>117</span>
+<span class='line-number'>118</span>
+<span class='line-number'>119</span>
+<span class='line-number'>120</span>
+<span class='line-number'>121</span>
+<span class='line-number'>122</span>
+<span class='line-number'>123</span>
+<span class='line-number'>124</span>
+<span class='line-number'>125</span>
+<span class='line-number'>126</span>
+<span class='line-number'>127</span>
+<span class='line-number'>128</span>
+<span class='line-number'>129</span>
+<span class='line-number'>130</span>
+<span class='line-number'>131</span>
+<span class='line-number'>132</span>
+<span class='line-number'>133</span>
+<span class='line-number'>134</span>
+<span class='line-number'>135</span>
+<span class='line-number'>136</span>
+<span class='line-number'>137</span>
+<span class='line-number'>138</span>
+<span class='line-number'>139</span>
+<span class='line-number'>140</span>
+<span class='line-number'>141</span>
+<span class='line-number'>142</span>
+<span class='line-number'>143</span>
+<span class='line-number'>144</span>
+<span class='line-number'>145</span>
+<span class='line-number'>146</span>
+<span class='line-number'>147</span>
+<span class='line-number'>148</span>
+<span class='line-number'>149</span>
+<span class='line-number'>150</span>
+<span class='line-number'>151</span>
+<span class='line-number'>152</span>
+<span class='line-number'>153</span>
+<span class='line-number'>154</span>
+<span class='line-number'>155</span>
+<span class='line-number'>156</span>
+<span class='line-number'>157</span>
+<span class='line-number'>158</span>
+<span class='line-number'>159</span>
+<span class='line-number'>160</span>
+<span class='line-number'>161</span>
+<span class='line-number'>162</span>
+<span class='line-number'>163</span>
+<span class='line-number'>164</span>
+<span class='line-number'>165</span>
+<span class='line-number'>166</span>
+<span class='line-number'>167</span>
+<span class='line-number'>168</span>
+<span class='line-number'>169</span>
+<span class='line-number'>170</span>
+<span class='line-number'>171</span>
+<span class='line-number'>172</span>
+<span class='line-number'>173</span>
+<span class='line-number'>174</span>
+<span class='line-number'>175</span>
+<span class='line-number'>176</span>
+<span class='line-number'>177</span>
+<span class='line-number'>178</span>
+<span class='line-number'>179</span>
+<span class='line-number'>180</span>
+<span class='line-number'>181</span>
+<span class='line-number'>182</span>
+<span class='line-number'>183</span>
+<span class='line-number'>184</span>
+<span class='line-number'>185</span>
+<span class='line-number'>186</span>
+<span class='line-number'>187</span>
+<span class='line-number'>188</span>
+<span class='line-number'>189</span>
+<span class='line-number'>190</span>
+<span class='line-number'>191</span>
+<span class='line-number'>192</span>
+<span class='line-number'>193</span>
+<span class='line-number'>194</span>
+<span class='line-number'>195</span>
+<span class='line-number'>196</span>
+<span class='line-number'>197</span>
+<span class='line-number'>198</span>
+<span class='line-number'>199</span>
+<span class='line-number'>200</span>
+<span class='line-number'>201</span>
+<span class='line-number'>202</span>
+<span class='line-number'>203</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>The trick is finding a way to call my malicious class. I know that my victim will be downloading some library, and I need to run my malicious code regardless of what classes in the library they actually use. I would also like to actual functionality of the library to not be affected.&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;Java has the concept of static class blocks, which are class level initializers — that is, they contain code that is run once when the class (not an instance!) is loaded into memory. After I insert a malicious class file into the jar, I can call it in a static block like this:&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;&lt;code&gt;java
+</span><span class='line'>import dilettante.*;
+</span><span class='line'>static {
+</span><span class='line'>    Dilettante.backdoor();
+</span><span class='line'>}
+</span><span class='line'>&lt;/code&gt;&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;In order to inject the above snippet, I need to inject it into Java classes directly, not source files. I use &lt;a href="https://github.com/Storyyeller/Krakatau"&gt;Krakatau&lt;/a&gt;, a Java disassembler/assembler library for Python. It let’s me add the snippet in &lt;a href="http://jasmin.sourceforge.net/"&gt;Jasmin&lt;/a&gt; format:&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;&lt;code&gt;
+</span><span class='line'>.method static &lt;clinit&gt; : ()V
+</span><span class='line'>  ; method code size: 4 bytes
+</span><span class='line'>  .limit stack 0
+</span><span class='line'>  .limit locals 0
+</span><span class='line'>  invokestatic dilettante/Dilettante backdoor ()V
+</span><span class='line'>  return
+</span><span class='line'>.end method
+</span><span class='line'>&lt;/code&gt;&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;h2 id="limitations"&gt;Limitations&lt;/h2&gt;
+</span><span class='line'>&lt;p&gt;This is a proof of concept!, and so it still has some limitations&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;ol&gt;
+</span><span class='line'>  &lt;li&gt;
+</span><span class='line'>    &lt;p&gt;Currently it’s not very fast. There are a couple of reasons for this&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>    &lt;ul&gt;
+</span><span class='line'>      &lt;li&gt;I have to run a disassemble and an assemble step. It would be more efficient to directly append the assembled shim to the .class file.&lt;/li&gt;
+</span><span class='line'>      &lt;li&gt;The way I am using Python’s zipfile library, I’m actually creating a second copy of every class in the zip. This is inefficient in terms of space and speed. Careful reading of the zip spec may lead to an efficient way of appending data to files inside a zip.&lt;/li&gt;
+</span><span class='line'>    &lt;/ul&gt;
+</span><span class='line'>  &lt;/li&gt;
+</span><span class='line'>  &lt;li&gt;
+</span><span class='line'>    &lt;p&gt;If a user is downloading multiple JARs in one go, we will backdoor each one. The malicious payload is executed only once per JAR, but if multiple JARs are backdoored, we will execute it several times. This issue will disappear if we replace the cat picture with a high quality persistent backdoor that is smart enough to only infect a system once :).&lt;/p&gt;
+</span><span class='line'>  &lt;/li&gt;
+</span><span class='line'>&lt;/ol&gt;
+</span><span class='line'>]]&gt;&lt;/content&gt;
+</span><span class='line'>  &lt;/entry&gt;
+</span><span class='line'>  
+</span><span class='line'>  &lt;entry&gt;
+</span><span class='line'>    &lt;title type="html"&gt;&lt;![CDATA[Delimited Continuations in Ruby Part 2: Generators and Coroutines]]&gt;&lt;/title&gt;
+</span><span class='line'>    &lt;link href="http://blog.ontoillogical.com/blog/2014/07/21/delimited-continuations-in-ruby-part-2/"/&gt;
+</span><span class='line'>    &lt;updated&gt;2014-07-21T03:00:00-04:00&lt;/updated&gt;
+</span><span class='line'>    &lt;id&gt;http://blog.ontoillogical.com/blog/2014/07/21/delimited-continuations-in-ruby-part-2&lt;/id&gt;
+</span><span class='line'>    &lt;content type="html"&gt;&lt;![CDATA[&lt;p&gt;Last &lt;a href="http://blog.ontoillogical.com/blog/2014/07/12/delimited-continuations-in-ruby/"&gt;time&lt;/a&gt;, I showed some basic things you can do with delimited continuations. If you’re still confused about them (as I am!) another good tutorial is &lt;a href="http://community.schemewiki.org/?composable-continuations-tutorial"&gt;here&lt;/a&gt;.&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;Let’s dive right in and build some more complicated control structures!&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;h2 id="generators"&gt;Generators&lt;/h2&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;Let’s start by building what Python calls “Generators.” Ruby has Enumerators, which are pretty similar, but I’ll call it a generator in order to differentiate my implementation from the Ruby core.&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;Here’s the code I want to write
+</span><span class='line'>&lt;code&gt;ruby
+</span><span class='line'>counter = Generator.new do |g| 
+</span><span class='line'>  ctr = 0
+</span><span class='line'>  while true
+</span><span class='line'>    g.yield(ctr)
+</span><span class='line'>    ctr += 1
+</span><span class='line'>  end
+</span><span class='line'>end
+</span><span class='line'>&lt;/code&gt;
+</span><span class='line'>Then I use it like so&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;&lt;code&gt;ruby
+</span><span class='line'>counter.next
+</span><span class='line'># =&gt; 0
+</span><span class='line'>counter.next
+</span><span class='line'># =&gt; 1
+</span><span class='line'>counter.next
+</span><span class='line'># =&gt; 2
+</span><span class='line'># ...
+</span><span class='line'>&lt;/code&gt;&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;Using delimited continuations to build a generator is pretty straight-forward. Our constructor will get a block and surround it with a &lt;code&gt;prompt&lt;/code&gt; to delimit a continuation. Yielding adds the yielded value into an internal queue, and uses &lt;code&gt;control&lt;/code&gt; to capture a continuation. When we call that continuation, we will execute the code around the control, which is precisely like entering at where we called yield. Getting the next value of our generator pops a result off the queue and invokes the saved continuation.&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;The annotated code is below.&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;```
+</span><span class='line'>class Generator
+</span><span class='line'>  def initialize(&amp;block)
+</span><span class='line'>    # @results will be used to save values yielded by our generator
+</span><span class='line'>    @results = []
+</span><span class='line'>    # Calling the block is wrapped in a prompt in order to enclose it in a continuation
+</span><span class='line'>    DelimR.prompt do
+</span><span class='line'>      # The block is passed self, so that it can call the yield method defined below
+</span><span class='line'>      block.call(self)
+</span><span class='line'>    end
+</span><span class='line'>  end&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;def yield(result)
+</span><span class='line'>    # The yield method saves the result it receives, and saves the continuation in @next
+</span><span class='line'>    @results « result
+</span><span class='line'>    DelimR.control do |k| 
+</span><span class='line'>      @next = k
+</span><span class='line'>    end
+</span><span class='line'>  end
+</span><span class='line'>  def next
+</span><span class='line'>    # @result is used as a FIFO queue of yielded values
+</span><span class='line'>    r = @results.shift&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;pre&gt;&lt;code&gt;# an empty @results means that no more values have been yielded
+</span><span class='line'>if r.nil?
+</span><span class='line'>  raise "Iterator finished"
+</span><span class='line'>end
+</span><span class='line'>
+</span><span class='line'># This invokes the saved continuation, not passing it any values
+</span><span class='line'>@next.call(nil)
+</span><span class='line'>
+</span><span class='line'># return the saved @result that was shifted off the bottom of the queue
+</span><span class='line'>r   end end ```
+</span><span class='line'>&lt;/code&gt;&lt;/pre&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;h2 id="coroutines"&gt;Coroutines&lt;/h2&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;Coroutines, also known as Fibers in ruby-land, are subroutines that can suspend their execution, to be resumed at a later point. They are very useful as a lightweight thread-like construct. They are very similar to generators, and can actually be implemented in terms of &lt;a href="http://legacy.python.org/dev/peps/pep-0342/"&gt;them&lt;/a&gt;. Besides being useful for asynchronous tasks, &lt;a href="http://eli.thegreenplace.net/2009/08/29/co-routines-as-an-alternative-to-state-machines/"&gt;“Co-routines are to state machines what recursion is to stacks”&lt;/a&gt;. &lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;We can can modify our &lt;code&gt;Generator&lt;/code&gt; class to be a coroutine by renaming &lt;code&gt;next&lt;/code&gt; to &lt;code&gt;send&lt;/code&gt; and allowing data to be passed into it, so &lt;code&gt;foo = c.yield&lt;/code&gt; will alssign whatever is sent to the coroutine to &lt;code&gt;foo&lt;/code&gt; when execution resumes.&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;```ruby
+</span><span class='line'>class Coroutine
+</span><span class='line'>  # initialize and yield are the same as for Generator
+</span><span class='line'>  def send(value=nil)
+</span><span class='line'>    # @result is used as a FIFO queue of yielded values
+</span><span class='line'>    r = @results.shift&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;pre&gt;&lt;code&gt;# an empty @results means that no more values have been yielded
+</span><span class='line'>if r.nil?
+</span><span class='line'>  raise "Iterator finished"
+</span><span class='line'>end
+</span><span class='line'>
+</span><span class='line'># This invokes the saved continuation, not passing it any values
+</span><span class='line'>@next.call(value)
+</span><span class='line'>
+</span><span class='line'># return the saved @result that was shifted off the bottom of the queue
+</span><span class='line'>r   end end ```
+</span><span class='line'>&lt;/code&gt;&lt;/pre&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;Here’s an implementation of the parsing example from Eli Bendersky’s blog &lt;a href="http://eli.thegreenplace.net/2009/08/29/co-routines-as-an-alternative-to-state-machines/"&gt;post&lt;/a&gt; using the Coroutine class defined above.&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;```ruby
+</span><span class='line'>def hex_encode(str)
+</span><span class='line'>  str.split(//).map{ |x| x.ord.to_s(16) }.join
+</span><span class='line'>end&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;frame_receiver = Coroutine.new do |c| 
+</span><span class='line'>  while true
+</span><span class='line'>    frame = (c.yield(true))
+</span><span class='line'>    puts ‘Got frame:’, hex_encode(frame)
+</span><span class='line'>  end
+</span><span class='line'>end&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;unwrap_protocol = Coroutine.new do |c| 
+</span><span class='line'>  header = “\x61”
+</span><span class='line'>  footer = “\x62”
+</span><span class='line'>  dle = “\xAB”
+</span><span class='line'>  after_dle_func = lambda { |x| x }
+</span><span class='line'>  target = frame_receiver
+</span><span class='line'>  # Outer loop looking for a frame header
+</span><span class='line'>  #
+</span><span class='line'>  while true
+</span><span class='line'>    byte = (c.yield(true))
+</span><span class='line'>    frame = ‘’&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;pre&gt;&lt;code&gt;if byte == header
+</span><span class='line'>  # Capture the full frame
+</span><span class='line'>  #
+</span><span class='line'>  while true
+</span><span class='line'>   
+</span><span class='line'>    byte = (c.yield(true))
+</span><span class='line'>    
+</span><span class='line'>    if byte == footer
+</span><span class='line'>
+</span><span class='line'>      target.send(frame)
+</span><span class='line'>      break
+</span><span class='line'>    elsif byte == dle
+</span><span class='line'>      byte = (c.yield(true))
+</span><span class='line'>      frame += after_dle_func.call(byte)
+</span><span class='line'>    else
+</span><span class='line'>      frame += byte
+</span><span class='line'>    end
+</span><span class='line'>  end
+</span><span class='line'>end   end end
+</span><span class='line'>&lt;/code&gt;&lt;/pre&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;bytes = [0x70, 0x24,
+</span><span class='line'>         0x61, 0x99, 0xAF, 0xD1, 0x62,
+</span><span class='line'>         0x56, 0x62,
+</span><span class='line'>         0x61, 0xAB, 0xAB, 0x14, 0x62,
+</span><span class='line'>         0x7
+</span><span class='line'>        ].map(&amp;:chr)&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;bytes.each do |byte|
+</span><span class='line'>  unwrap_protocol.send(byte)
+</span><span class='line'>end&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;h1 id="got-frame"&gt;Got frame:&lt;/h1&gt;
+</span><span class='line'>&lt;p&gt;# 99afd1
+</span><span class='line'># Got frame:
+</span><span class='line'># ab14</span></code></pre></td></tr></table></div></figure></p>
 
 <h2 id="final-thoughts">Final thoughts</h2>
 
@@ -350,21 +551,33 @@ puts "i is #{i}"
 
 <p>We can even build a reverse GOTO (known as the COMEFROM, implementation courtesy of <a href="https://en.wikipedia.org/wiki/COMEFROM#Practical_uses">Wikipedia</a>).</p>
 
-<p>&#8220;`
-$come_from_labels = {}</p>
-
-<p>def label(l)
-    if $come_from_labels[l]
-        $come_from_labels[l].call
-    end
-end</p>
-
-<p>def come_from(l)
-    callcc do |block|
-        $come_from_labels[l] = block
-    end
-end
-&#8220;`</p>
+<p><figure class='code'><figcaption><span>ruby </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$come_from_labels = {}&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;p>def label(l)
+</span><span class='line'>    if $come_from_labels[l]
+</span><span class='line'>        $come_from_labels[l].call
+</span><span class='line'>    end
+</span><span class='line'>end&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;p>def come_from(l)
+</span><span class='line'>    callcc do |block|
+</span><span class='line'>        $come_from_labels[l] = block
+</span><span class='line'>    end
+</span><span class='line'>end</span></code></pre></td></tr></table></div></figure></p>
 
 <h2 id="problems-abound">Problems Abound</h2>
 
