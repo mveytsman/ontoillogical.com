@@ -8,8 +8,6 @@ categories:
 
 I'll be showing my BitTorrent video collage at [Long Winter](http://www.torontolongwinter.com/) tonight.
 
-![Last Days of The Pirate Bay](/assets/images/last-days/last-days.png)
-
 ```
 $ cat last-days.nfo
     __               __     ____                            ____
@@ -66,3 +64,5 @@ The Pirate Bay 2003-2014(?)
 Greets: Hacker School where writing a BitTorrent client is a right of
 passage, Nicolas Maigret who I shamelessly stole from.
 ```
+
+![Last Days of The Pirate Bay](/assets/images/last-days/last-days.png)
