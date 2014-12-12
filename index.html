@@ -9,9 +9,36 @@
   <meta name="author" content="Max Veytsman">
 
   
-  <meta name="description" content="Last night, I was having a drink with a friend and he asked me what I
-liked about Clojure. Immutable data structures are coming in vogue
-outside &hellip;">
+  <meta name="description" content="I’ll be showing my BitTorrent video collage at Long Winter tonight. 1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +102,155 @@ outside &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+  
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/12/last-days-of-the-pirate-bay/">Last Days of The Pirate Bay</a></h1>
+      
+      
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-12-12T13:55:36-05:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>I’ll be showing my BitTorrent video collage at <a href="http://www.torontolongwinter.com/">Long Winter</a> tonight.</p>
+
+<p><img src="/assets/images/last-days/last-days.png" alt="Last Days of The Pirate Bay" /></p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+<span class="line-number">31</span>
+<span class="line-number">32</span>
+<span class="line-number">33</span>
+<span class="line-number">34</span>
+<span class="line-number">35</span>
+<span class="line-number">36</span>
+<span class="line-number">37</span>
+<span class="line-number">38</span>
+<span class="line-number">39</span>
+<span class="line-number">40</span>
+<span class="line-number">41</span>
+<span class="line-number">42</span>
+<span class="line-number">43</span>
+<span class="line-number">44</span>
+<span class="line-number">45</span>
+<span class="line-number">46</span>
+<span class="line-number">47</span>
+<span class="line-number">48</span>
+<span class="line-number">49</span>
+<span class="line-number">50</span>
+<span class="line-number">51</span>
+<span class="line-number">52</span>
+<span class="line-number">53</span>
+<span class="line-number">54</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">$ cat last-days.nfo
+</span><span class="line">    __               __     ____                            ____
+</span><span class="line">   / /   ____ ______/ /_   / __ \____ ___  _______   ____  / __/
+</span><span class="line">  / /   / __ `/ ___/ __/  / / / / __ `/ / / / ___/  / __ \/ /_  
+</span><span class="line"> / /___/ /_/ (__  ) /_   / /_/ / /_/ / /_/ (__  )  / /_/ / __/  
+</span><span class="line">/_____/\__,_/____/\__/  /_____/\__,_/\__, /____/   \____/_/     
+</span><span class="line">                                    /____/                      
+</span><span class="line">  ________            ____  _            __          ____             
+</span><span class="line"> /_  __/ /_  ___     / __ \(_)________ _/ /____     / __ )____ ___  __
+</span><span class="line">  / / / __ \/ _ \   / /_/ / / ___/ __ `/ __/ _ \   / __  / __ `/ / / /
+</span><span class="line"> / / / / / /  __/  / ____/ / /  / /_/ / /_/  __/  / /_/ / /_/ / /_/ / 
+</span><span class="line">/_/ /_/ /_/\___/  /_/   /_/_/   \__,_/\__/\___/  /_____/\__,_/\__, /  
+</span><span class="line">                                                             /____/   
+</span><span class="line">
+</span><span class="line">Last Days of The Pirate Bay
+</span><span class="line">
+</span><span class="line">On December 9th, Swedish police raided a datacenter in Stockholm and
+</span><span class="line">seized the servers that run The Pirate Bay, shutting down the world's
+</span><span class="line">most notorious and popular piracy site. Five days previously, on
+</span><span class="line">December 4th, I had bought a server under an assumed name from a
+</span><span class="line">European hosting company that doesn't ask too many questions, chose
+</span><span class="line">the 100 most popular movie torrents from The Pirate Bay, and began
+</span><span class="line">recording network traffic. I had no idea that I was recording the last
+</span><span class="line">days of The Pirate Bay.
+</span><span class="line">
+</span><span class="line">TPB was a BitTorrent tracker. BitTorrent is a way for many
+</span><span class="line">people to share large files over the internet. To download a movie
+</span><span class="line">over BitTorrent is to connect to other people downloading that movie
+</span><span class="line">and request little pieces. The pieces are downloaded out of order from
+</span><span class="line">your peers across the globe and then reassembled on your computer back
+</span><span class="line">into the movie you want.
+</span><span class="line">
+</span><span class="line">After I downloaded the 100 most popular movies, I started to seed
+</span><span class="line">them for others to download. People from around the world are
+</span><span class="line">downloading little pieces of different movies from me, and as they do, I
+</span><span class="line">record the piece they ask for and the IP address they were coming
+</span><span class="line">from.
+</span><span class="line">
+</span><span class="line">You're watching a visualization of that traffic.
+</span><span class="line">
+</span><span class="line">The Pirate Bay might come back, but it probably won't. It's not needed
+</span><span class="line">anymore. About 20 million nodes are connected at any given time to a
+</span><span class="line">global sharing network that doesn't need websites like TPB
+</span><span class="line">to distribute information about which peer has which file. All the
+</span><span class="line">movies I downloaded are still being actively shared without TPB.
+</span><span class="line">
+</span><span class="line">TPB is gone, for now at least. Consider this my eulogy.
+</span><span class="line">
+</span><span class="line">The Pirate Bay 2003-2014(?)
+</span><span class="line">
+</span><span class="line">- Max Veytsman, December 2014
+</span><span class="line">
+</span><span class="line">Greets: Hacker School where writing a BitTorrent client is a right of
+</span><span class="line">passage, Nicolas Maigret who I shamelessly stole from.</span></code></pre></td></tr></table></div></figure></notextile></div>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1561,179 +1737,6 @@ Here’s how it works:</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-  
-    
-      <h1 class="entry-title"><a href="/blog/2012/10/31/breaking-in-and-out-of-vagrant/">Breaking in and out of Vagrant</a></h1>
-      
-      
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-10-31T17:11:00-04:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>**You can also find this post on my consultancy’s blog <a href="http://finite.state.io/blog/2012/10/30/breaking-in-and-out-of-vagrant/">here</a> **</p>
-
-<p><a href="http://vagrantup.com/">Vagrant</a> is a great tool that allows you to
-easily spawn and configure lightweight VMs to use as development
-environments. Vagrant provides base installs of several flavours of
-Linux, and takes care of setting up networking and shared folders for
-you.  </p>
-
-<p>Vagrant is really useful for managing your development environment,
-and I highly recommend it. If you’re doing a lot of development,
-you might need to be running all kinds of application and database
-servers on your machine, and it’s probably a much better idea to run
-them in a VM rather than on your host machine.  </p>
-
-<p>Unfortunately, if you expose your Vagrant VMs (or any development VMs
-really) to the outside world, what seemed like a secure best practice
-can end up being very insecure. This isn’t a novel concept, but the
-disposable nature of virtual machines makes it easy to forget to think
-about their security. A common attitude is “What’s the worst that can
-happen if someone gets on my development VM? I blow away and
-re-generate this VM every half hour anyway, and aren’t VM escape bugs
-rare and esoteric anyway?”  </p>
-
-<p>I’m going to show a really simple way to break out of Vagrant VMs, but first,</p>
-
-<h2 id="how-vagrant-is-used">How Vagrant is Used</h2>
-
-<p>Vagrant VMs are designed to be lightweight and built per-project. The
-VMs around a concept of “base boxes,” which are base installs of
-various flavours of linux. You initialize a Vagrant VM from a base
-box, and then can install your desired environment.</p>
-
-<p>By default, Vagrant shares your project folder 
-with the VM at <code>/vagrant/</code>. So, a usual workflow would be:</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line">host: <span class="nv">$ </span><span class="nb">cd</span> /my/project/here/
-</span><span class="line">host: <span class="nv">$ </span><span class="c">#we&#39;re going to base our VM on an Ubuntu Lucid 32bit base box </span>
-</span><span class="line">host: <span class="nv">$ </span>vagrant box add lucid32 http://files.vagrantup.com/lucid32.box
-</span><span class="line">host: <span class="nv">$ </span>vagrant init lucid32
-</span><span class="line">host: <span class="nv">$ </span>vagrant up
-</span><span class="line">host: <span class="nv">$ </span>vagrant ssh
-</span><span class="line">  vm: <span class="nv">$ </span><span class="c">#now we are on the VM</span>
-</span><span class="line">  vm: <span class="nv">$ </span><span class="nb">cd</span> /vagrant/
-</span><span class="line">  vm: <span class="nv">$ </span>run_my_server
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-<p>You can then edit the code on your host machine, and use the VM to run an applciation and database server.</p>
-
-<h2 id="bridging-the-network">Bridging the Network</h2>
-
-<p>Just like in any virtual machine, you can configure your Vagrant VMs’
-networking to run in host-only mode or in bridged mode. In host-only
-mode, a VM uses a virtual network adapter and is basically only
-accessible from the host. In bridged mode, the VM bridges through the
-network adapter of the host machine, and actually connects to the same
-network as the host. So, for example, if you bridge a VM to a wifi
-device, the VM will have a different IP address on the same wifi
-network as the host. And of course, you’ll be able to access the VM
-from other machines on the wifi network. In host-only mode, the VM is
-not accessible from outside the host. As they say, NAT is the poor
-man’s firewall.</p>
-
-<p>The Vagrant
-<a href="http://vagrantup.com/v1/docs/bridged_networking.html">documentation</a>
-doesn’t mention any security risks of running development VMs in
-bridged mode. There’s a promising alert box, but the contents are:</p>
-
-<blockquote>
-  <h4 id="not-all-networks-work">Not All Networks Work!</h4>
-  <p>Some networks will not work properly with bridged networking. Specifically, I’ve found that hotel networks, airport networks, and generally public-shared networks have configurations in place such that bridging does not work.
-You can tell if the bridged networking worked successfully by seeing if the virtual machine was able to get an IP address on the bridged adapter.</p>
-</blockquote>
-
-<p>The author doesn’t seem to see any intrinsic problem with running Vagrant VMs in hotels, airports, and coffee-shops outside of it sometimes not working.</p>
-
-<h2 id="breaking-in">Breaking In</h2>
-
-<p>So after scanning the airport wifi, you found someone running a
-Vagrant VM in bridged mode. How do you get in? First of all, they are
-most like likely doing some kind of development on it, so the VM is
-probably running an app that’s not very secured. There’s also a good
-chance that this VM is running a database and maybe CouchDB or Redis.
-One of these is probably using guessable credentials (this is the
-development environment after all), or the app itself might have an
-exploitable bug.</p>
-
-<p>All of the above sounds too hard. Remember the <code>vagrant ssh</code> command
-above? Well, it has to get in somehow.  </p>
-
-<p>On all of the VMs built from official base boxes, like <code>lucid32</code> the
-credentials are <code>vagrant : vagrant</code>. The instructions for developers
-building new base boxes actually say not to use password-based SSH
-logins. Instead, anyone building a base box for public consumption is
-using these <a href="https://github.com/mitchellh/vagrant/tree/master/keys/">SSH keys</a> for the
-<code>vagrant</code> user.</p>
-
-<p>Either way, any Vagrant VM built from a public base box (read: almost
-all of them) is going to be accessible with either <code>vagrant : vagrant</code>
-or the SSH keys above.</p>
-
-<h2 id="breaking-out">Breaking Out</h2>
-
-<p>Breaking into a development VM isn’t a big deal on it’s own,
-especially since the vagrant workflow encourages blowing-away and
-rebuilding the VM often. What you really want is code execution on the
-host, and it’s going to be surprisingly easy to do that.</p>
-
-<p>The Vagrant workflow encourages you to edit your code outside the VM.
-That’s why Vagrant helpfully shares the project directory as
-<code>/vagrant/</code> in the VM. It’s a safe assumption that anyone using
-Vagrant for development is using some kind of version control, and if
-that’s the case, they are probably going to be interacting with it on
-the host machine (where they edit the code). This is how we’ll get
-execution on the host.</p>
-
-<p>For simplicity, I’m going to focus on Git, but this trick should work
-for any other commonly used VCS. Hooks are little shell scripts that
-run after you commit a certain action. For instance, a <code>post-commit</code>
-hook is a shell script that git will execute every time a commit is
-completed. Hooks are placed in <code>.git/hooks/HOOK-NAME</code>.</p>
-
-<p>So if I get on a Vagrant VM and want to escape into the host, all I
-have to do is create a post-commit hook. I simply put evil things in
-<code>/vagrant/.git/hooks/post-commit</code> and wait for the user to commit some
-code. Since the <code>/vagrant/</code> directory is mounted from the host, my
-hook will persist even if the user destroys the VM.</p>
-
-<p>If you liked this, you should follow me on <a href="https://twitter.com/mveytsman">twitter</a>.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="2">&larr; Older</a>
@@ -1749,6 +1752,10 @@ hook will persist even if the user destroys the VM.</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/12/12/last-days-of-the-pirate-bay/">Last Days of The Pirate Bay</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/10/18/solving-the-expression-problem-in-clojure/">Solving the Expression Problem in Clojure</a>
       </li>
     
@@ -1762,10 +1769,6 @@ hook will persist even if the user destroys the VM.</p>
     
       <li class="post">
         <a href="/blog/2014/07/12/delimited-continuations-in-ruby/">Delimited Continuations in Ruby Part 1</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/07/03/doorbot-overflow/">Doorbot Overflow</a>
       </li>
     
   </ul>
