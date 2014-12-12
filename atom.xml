@@ -4,7 +4,7 @@
   <title><![CDATA[Ontoillogical]]></title>
   <link href="http://blog.ontoillogical.com/atom.xml" rel="self"/>
   <link href="http://blog.ontoillogical.com/"/>
-  <updated>2014-12-12T14:11:20-05:00</updated>
+  <updated>2014-12-12T16:54:58-05:00</updated>
   <id>http://blog.ontoillogical.com/</id>
   <author>
     <name><![CDATA[Max Veytsman]]></name>
@@ -77,6 +77,7 @@
 <span class="line-number">52</span>
 <span class="line-number">53</span>
 <span class="line-number">54</span>
+<span class="line-number">55</span>
 </pre></td><td class="code"><pre><code class=""><span class="line">$ cat last-days.nfo
 </span><span class="line">    __               __     ____                            ____
 </span><span class="line">   / /   ____ ______/ /_   / __ \____ ___  _______   ____  / __/
@@ -130,7 +131,8 @@
 </span><span class="line">- Max Veytsman, December 2014
 </span><span class="line">
 </span><span class="line">Greets: Hacker School where writing a BitTorrent client is a right of
-</span><span class="line">passage, Nicolas Maigret who I shamelessly stole from.</span></code></pre></td></tr></table></div></figure></notextile></div>
+</span><span class="line">passage, Nicolas Maigret who I shamelessly stole from, Long Winter for
+</span><span class="line">letting me do this.</span></code></pre></td></tr></table></div></figure></notextile></div>
 
 <p><img src="http://blog.ontoillogical.com/assets/images/last-days/last-days.png" alt="Last Days of The Pirate Bay" /></p>
 ]]></content>
