@@ -62,7 +62,8 @@ The Pirate Bay 2003-2014(?)
 - Max Veytsman, December 2014
 
 Greets: Hacker School where writing a BitTorrent client is a right of
-passage, Nicolas Maigret who I shamelessly stole from.
+passage, Nicolas Maigret who I shamelessly stole from, Long Winter for
+letting me do this.
 ```
 
 ![Last Days of The Pirate Bay](/assets/images/last-days/last-days.png)
