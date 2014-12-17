@@ -17,7 +17,7 @@ organize [RubySec](http://www.rubysec.com/) to provide security
 resources for the Ruby community.
 
 In the summer of 2014, I went to
-[Hacker School](https://www.hackerschool.com/), an awesome retreat for
+[Hacker School](https://www.hackerschool.com/), an artists retreat but for
 programmers. During that time, I helped improve the state of Java
 security by
 [injecting lolcats](http://blog.ontoillogical.com/blog/2014/07/28/how-to-take-over-any-java-developer/)
