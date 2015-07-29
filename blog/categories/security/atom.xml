@@ -4,7 +4,7 @@
   <title><![CDATA[Category: security | Ontoillogical]]></title>
   <link href="http://blog.ontoillogical.com/blog/categories/security/atom.xml" rel="self"/>
   <link href="http://blog.ontoillogical.com/"/>
-  <updated>2014-12-16T20:31:19-05:00</updated>
+  <updated>2015-07-28T22:48:16-07:00</updated>
   <id>http://blog.ontoillogical.com/</id>
   <author>
     <name><![CDATA[Max Veytsman]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[How to take over the computer of any Java (or Clojure or Scala) developer]]></title>
     <link href="http://blog.ontoillogical.com/blog/2014/07/28/how-to-take-over-any-java-developer/"/>
-    <updated>2014-07-28T14:12:48-04:00</updated>
+    <updated>2014-07-28T11:12:48-07:00</updated>
     <id>http://blog.ontoillogical.com/blog/2014/07/28/how-to-take-over-any-java-developer</id>
     <content type="html"><![CDATA[<p><strong>Update: 07/31/2014</strong></p>
 
@@ -118,7 +118,7 @@ static {
   <entry>
     <title type="html"><![CDATA[Doorbot Overflow]]></title>
     <link href="http://blog.ontoillogical.com/blog/2014/07/03/doorbot-overflow/"/>
-    <updated>2014-07-03T19:21:00-04:00</updated>
+    <updated>2014-07-03T19:21:00-07:00</updated>
     <id>http://blog.ontoillogical.com/blog/2014/07/03/doorbot-overflow</id>
     <content type="html"><![CDATA[<p>Today was presentation day at Hacker School. I have a 10 minute talk about “building a better doorbot” which was secretly a talk about exploiting stack buffer overflows.  People seemed to enjoy it.</p>
 
@@ -129,7 +129,7 @@ static {
   <entry>
     <title type="html"><![CDATA[How to locate any Tinder user]]></title>
     <link href="http://blog.ontoillogical.com/blog/2014/02/25/how-to-locate-any-tinder-user/"/>
-    <updated>2014-02-25T10:09:00-05:00</updated>
+    <updated>2014-02-25T10:09:00-08:00</updated>
     <id>http://blog.ontoillogical.com/blog/2014/02/25/how-to-locate-any-tinder-user</id>
     <content type="html"><![CDATA[<p><strong>You can also find this post on my consultancy’s blog <a href="http://finite.state.io/blog/2014/02/25/how-to-locate-any-tinder-user/">here</a></strong></p>
 
@@ -144,7 +144,7 @@ static {
   <entry>
     <title type="html"><![CDATA[Thoughts On Bsidesto]]></title>
     <link href="http://blog.ontoillogical.com/blog/2013/11/30/thoughts-on-bsidesto/"/>
-    <updated>2013-11-30T12:00:00-05:00</updated>
+    <updated>2013-11-30T12:00:00-08:00</updated>
     <id>http://blog.ontoillogical.com/blog/2013/11/30/thoughts-on-bsidesto</id>
     <content type="html"><![CDATA[<p>** You can also find this post on my consultancy’s blog <a href="http://finite.state.io/blog/2013/11/30/thoughts-on-bsidesto/">here</a> **</p>
 
@@ -190,7 +190,7 @@ Each BSides is a community-driven framework for building events for and by infor
   <entry>
     <title type="html"><![CDATA[Hacking Letterpress]]></title>
     <link href="http://blog.ontoillogical.com/blog/2012/11/09/hacking-letterpress/"/>
-    <updated>2012-11-09T14:38:00-05:00</updated>
+    <updated>2012-11-09T14:38:00-08:00</updated>
     <id>http://blog.ontoillogical.com/blog/2012/11/09/hacking-letterpress</id>
     <content type="html"><![CDATA[<p><strong>You can also find this post on my consultancy’s blog <a href="http://finite.state.io/blog/2012/11/09/hacking-letterpress/">here</a></strong></p>
 
