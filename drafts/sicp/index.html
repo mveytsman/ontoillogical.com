@@ -1,0 +1,584 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>sicp - Ontoillogical</title>
+  <meta name="author" content="Max Veytsman">
+
+  
+  <meta name="description" content="sicp (define (square x) (* x x)) (define (smallest-divisor n) (find-divisor n 2)) (define (find-divisor n test-divisor) (cond ((&gt; (square test- &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://blog.ontoillogical.com/drafts/sicp">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/javascripts/deps/codemirror/lib/codemirror.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/stylesheets/coding.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Ontoillogical" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Fjalla+One' rel='stylesheet' type='text/css'>
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-30917927-2']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   class="collapse-sidebar sidebar-footer" >
+  <header role="banner">
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:blog.ontoillogical.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article role="article">
+  
+  <header>
+    <h1 class="entry-title">sicp</h1>
+    <p class="meta">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-03-05T17:07:00-05:00" pubdate data-updated="true"></time></p>
+  </header>
+  
+  <script src="/javascripts/deps/codemirror/lib/codemirror.js"></script>
+
+<script src="/javascripts/deps/codemirror/mode/scheme/scheme.js"></script>
+
+<script src="/javascripts/coding.js"></script>
+
+<script>
+  c = new CodingJS("/javascripts/");
+</script>
+
+<div id="deps">
+<code>
+(define (square x)
+  (* x x))
+  
+  
+(define (smallest-divisor n)
+  (find-divisor n 2))
+
+(define (find-divisor n test-divisor)
+  (cond ((&gt; (square test-divisor) n) 
+         n)
+        ((divides? test-divisor n) 
+         test-divisor)
+        (else (find-divisor 
+               n 
+               (+ test-divisor 1)))))
+
+(define (divides? a b)
+  (= (remainder b a) 0))
+  (define (prime? n)
+  (= n (smallest-divisor n)))
+  
+
+
+(define (time f . args)
+  (newline)
+  (let ((start-time (runtime)))
+     (display (apply f args))
+     (display " *** ")
+     (display (- (runtime) start-time))))
+</code>
+</div>
+
+<script>
+  c.prompt("deps");
+</script>
+
+<p>I’m going through <a href="https://en.wikipedia.org/wiki/Structure_and_Interpretation_of_Computer_Programs">SICP</a> with a reading group in Toronto (if you’re in Toronto you should check us out at <a href="https://github.com/CompSciCabal/SMRTYPRTY">https://github.com/CompSciCabal/SMRTYPRTY</a>).</p>
+
+<p>As mind expanding as reading a seminal computer science text from the 80’s is, sometimes you see the advantages of studying computers back when they ran at speeds comprehendable to mere mortals. For instance, in a memorable section, you implement a couple of primality tests, and then analyze their runtime complexity by finding successively larger prime numbers and seeing how long it takes.</p>
+
+<p>Here’s SICP:</p>
+
+<blockquote>
+  <p>Use your procedure to find the three smallest primes larger than 1000; larger than 10,000; larger than 100,000; larger than 1,000,000. Note the time needed to test each prime. Since the testing algorithm has order of growth of Θ(√n), you should expect that testing for primes around 10,000 should take about 10⎯⎯⎯⎯√10 times as long as testing for primes around 1000. </p>
+</blockquote>
+
+<p>Ha — I’m timing in milliseconds, and it took me up to 10,000,000 to get the
+“naive” prime test to take a 1 millisecond.</p>
+
+<p>Things get worse when you implement a smarter (but probabilistic) primality test. The test is called Fermat’s primality test. Again, SICP:</p>
+
+<blockquote>
+  <p>The Θ(log⁡(n)) primality test is based on a result from number theory known as Fermat’s Little Theorem.45</p>
+</blockquote>
+
+<blockquote>
+  <p>Fermat’s Little Theorem: If n is a prime number and a is any positive integer less than n, then a raised to the nth power is congruent to a modulo n.</p>
+</blockquote>
+
+<blockquote>
+  <p>(Two numbers are said to be congruent modulo n if they both have the same remainder when divided by n. The remainder of a number aa when divided by n is also referred to as the remainder of a modulo n, or simply as a modulo n.)</p>
+</blockquote>
+
+<blockquote>
+  <p>If n is not prime, then, in general, most of the numbers a &lt; n will not satisfy the above relation. This leads to the following algorithm for testing primality: Given a number n, pick a random number a &lt; n and compute the remainder of a^n modulo n. If the result is not equal to a, then nn is certainly not prime. If it is a, then chances are good that n is prime. Now pick another random number a and test it with the same method. If it also satisfies the equation, then we can be even more confident that n is prime. By trying more and more values of a, we can increase our confidence in the result. This algorithm is known as the Fermat test.</p>
+</blockquote>
+
+<p>And SICP’s implementation is as follows</p>
+
+<div id="fast-prime">
+<code>
+(define (expmod base exp m)
+  (cond ((= exp 0) 1)
+        ((even? exp)
+         (remainder
+          (square (expmod base (/ exp 2) m))
+          m))
+        (else
+         (remainder
+          (* base (expmod base (- exp 1) m))
+          m))))
+          
+(define (fermat-test n)
+  (define (try-it a)
+    (= (expmod a n n) a))
+  (try-it (+ 1 (random (- n 1)))))
+  
+(define (fast-prime? n times)
+  (cond ((= times 0) true)
+        ((fermat-test n)
+         (fast-prime? n (- times 1)))
+        (else false)))
+</code>
+</div>
+
+<script>
+ c.frozen_prompt("fast-prime", ["deps"]);
+</script>
+
+<p>We can compare the time it takes to do the naive version, vs the <code>fast-prime?</code> version.</p>
+
+<div id="prompt1">
+<code>
+(display "(prime? 100003)")
+(time prime? 100003)
+(newline)
+(display "(fast-prime? 100003 2)")
+(time fast-prime? 100003 2)
+(newline)
+(display "(prime? 1000037)")
+(time prime? 1000037)
+(newline)
+(display "(fast-prime? 1000037 2)")
+(time fast-prime? 1000037 2)
+
+</code>
+</div>
+
+<script>
+ c.prompt("prompt1", ["fast-prime", "deps"]);
+</script>
+
+<p>But then something interesting happens when we get to primes above 10,000,000 <strong>warning: this takes about 2 seconds for <code>prime</code> to run on my browser</strong>.</p>
+
+<div id="prompt2">
+<code>
+(display "(fast-prime? 10000000019 2)")
+(time fast-prime? 10000000019 2)
+(newline)
+(display "(prime? 10000000019)")
+(time prime? 10000000019)
+</code>
+</div>
+
+<script>
+ c.prompt("prompt2", ["fast-prime", "deps"]);
+</script>
+
+<p>Oh oh. Looks like our fast-prime test is <em>failing</em> on numbers around 10,000,000.
+It’s a probabilistic test, but it’s always going to be true for primes — that
+is the fermat’s test is necessary but not sufficient to be a prime.</p>
+
+<p>The second argument to <code>fast-prime?</code> is how many times to run the test, and even
+though I understood the above, I still ran it with absurdly high numbers of
+iterations just to be sure.</p>
+
+<p>You might be wondering if 10000000019 is actually prime. A quick google led me to https://primes.utm.edu/curios/page.php/10000000019.html so at least we’re not alone in thinking it’s prime. (The fun fact about this prime listed on that site is that “The sum of the digits of the smallest eleven-digit prime is eleven.” Looks like they’re digging deep for the curios here…)</p>
+
+<p>At this point I gave up on the whole endeavor, until I met with the reading
+group and found that <a href="https://twitter.com/j0ni">@j0ni</a> had the same exact issue!
+Neither of us could get the <code>fast-prime?</code> test to work on any numbers greater than 10,000,000.</p>
+
+<p>As an aside, we’re both using <a href="http://www.call-cc.org/">Chicken Scheme</a>.</p>
+
+<p>The culprit is the <code>expmod</code> procedure. The Fermat test is that if a number p is prime, <code>(expmod a p p)</code> will be <code>a</code> for any <code>a</code> less than <code>p</code>.</p>
+
+<p>Running <code>(expmod 32 10000000019 10000000019)</code> on my machine, I get <code>5293704950.0</code>. That decimal point is a telltale sign that we blew past the maximum integer and got into float-land.</p>
+
+<p>I can modify the recursive <code>expmod</code> to print intermediate values:</p>
+
+<div id="print-expmod">
+<code>
+(define (expmod base exp m)
+  (let ((r (cond ((= exp 0) 1)
+                 ((even? exp)
+                  (remainder 
+                   (square (expmod base (/ exp 2) m))
+                   m))
+                 (else
+                  (remainder 
+                   (* base (expmod base (- exp 1) m))
+                   m)))))
+       (display "(expmod ")
+       (display base)
+       (display " ")
+       (display exp)
+       (display " ")
+       (display m)
+       (display ") ;=&gt; ")
+       (display r)
+       (display "\n")
+       r))
+
+(expmod 32 10000000019 10000000019)
+</code>
+</div>
+<script>
+ c.prompt("print-expmod", ["deps"])
+</script>
+
+<p>Things break down at <code>(expmod 32 18 10000000019)</code></p>
+
+<p>When <code>expmod</code> is called with an even exponent, it recurs with <code>(remainder (square (expmod base (/ exp 2) m)) m)</code>. This is to use squaring and halving the exponent to get logarithmic growth.</p>
+
+<p>And indeed, if we perform the step directly for m = 18, we blow past the integers.</p>
+
+<div id="remainder">
+<code>
+;;(remainder (square (expmod 32 (/ 18 2) 10000000019)) 10000000019)) 
+;; expands =&gt;
+;;(remainder (square 4372021990) 10000000019)
+;; expands =&gt;
+(square 4372021990)
+</code>
+</div>
+<script>
+ c.prompt("remainder", ["deps"])
+</script>
+
+<p>And there you have it. The successive squaring blows past the max int, and we get into float-land, losing precision and giving us erroneous results for expmod.</p>
+
+<p>** Note in js the highest full precision number is 9007199254740991, wish there was a better way to illustrate it, like getting js to display it with an exponent **</p>
+
+<h2 id="fixing-it">Fixing it</h2>
+
+<p>The first thing we can do is get rid of the squaring and halving part in expmod so we never get numbers that are too big:</p>
+
+<div id="slow-expmod">
+<code>
+(define (slow-expmod base exp m)
+  (if (= exp 0)
+      1
+      (remainder 
+       (* base (slow-expmod base (- exp 1) m))
+       m)))
+</code>
+</div>
+<script>
+ c.prompt("slow-expmod", ["deps"])
+</script>
+
+<p>You can try computing some values above, but unfortunately, <code>(slow-expmod 32 32 10000000019)</code> is slow enough to wear out my patience even on my “modern computer”. The fact that we create 10000000019 stack frames certainly doesn’t help.</p>
+
+<p>A better solution exists, all you have to do is, as SICP likes to say, observe that <code>ab mod p = (a mod p)(b mod p) mod p</code>. Instead of computing the square and then finding the remainder, we can write a remainder-aware <code>square</code> procedure that computes squares while taking the remainder of intermediate results.</p>
+
+<p>In an exercise, you’re asked to make a fast multiply procedure that uses doubling and halving to ger O(log(n)) speed. We can use it to build a remainder-aware multiply procedure as a base of our remainder aware <code>sqaure</code>.</p>
+
+<p>My fast multiply is:</p>
+
+<div id="fast-mult">
+<code>
+(define (fast-* a b)
+  (cond ((= b 0)
+         0)
+        ((even? b)
+         (fast-* (* a 2) (/ b 2)))
+        (else
+         (+ a (fast-* a (- b 1))))))
+</code>
+</div>
+<script>
+ c.frozen_prompt("fast-mult", ["deps"])
+</script>
+
+<p>We can make this remainder-aware pretty easily:</p>
+
+<div id="fast-mod">
+<code>
+(define (fast-modulo-* a b m)
+  (cond ((= b 0)
+         0)
+        ((even? b)
+         (fast-modulo-* (remainder (* a 2) m) (remainder (/ b 2) m) m))
+        (else
+         (remainder (+ (remainder a m)  (fast-modulo-* a (- b 1) m)) m))))
+         
+</code>
+</div>
+<script>
+ c.frozen_prompt("fast-mod", ["deps", "fast-mult"])
+</script>
+
+<p>Giving us a <code>square-modulo</code>:</p>
+
+<div id="square-mod">
+<code>
+(define (square-modulo a m)
+  (fast-modulo-* a a m))
+</code>
+</div>
+<script>
+ c.frozen_prompt("square-mod", ["deps", "fast-mod"])
+</script>
+
+<p>Putting it into the <code>safe-expmod</code>, we get</p>
+
+<div id="safe-expmod">
+<code>
+(define (safe-expmod base exp m)
+  (cond ((= exp 0) 1)
+        ((even? exp)
+         (square-modulo (safe-expmod base (/ exp 2) m) m))
+        (else
+          (fast-modulo-* base (safe-expmod base (- exp 1) m) m))))
+</code>
+</div>
+<script>
+ c.frozen_prompt("safe-expmod", ["deps", "square-mod"])
+</script>
+
+<p>And it works!</p>
+
+<div id="prompt3">
+<code>
+(safe-expmod 32 10000000019 10000000019)
+</code>
+</div>
+<script>
+ c.prompt("prompt3", ["deps", "safe-expmod"])
+</script>
+
+<p>We can rewrite the Fermat test to use  <code>safe-expmod</code>:</p>
+
+<div id="safe-fermat">
+<code>
+(define (safe-fermat-test n)
+  (define (try-it a)
+    (= (safe-expmod a n n) a))
+  (try-it (+ 1 (random (- n 1)))))
+
+(define (safe-fast-prime? n times)
+  (cond ((= times 0) #t)
+        ((safe-fermat-test n) 
+         (safe-fast-prime? n (- times 1)))
+        (else #f)))
+</code>
+</div>
+
+<script>
+ c.frozen_prompt("safe-fermat", ["deps", "safe-expmod"])
+</script>
+
+<p>And lo and behold:</p>
+
+<div id="prompt4">
+<code>
+(safe-fast-prime? 10000000019 2)
+</code>
+</div>
+<script>
+ c.prompt("prompt4", ["deps", "safe-fermat"])
+</script>
+
+
+  
+    <footer>
+      <p class="meta">
+        
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-03-05T17:07:00-05:00" pubdate data-updated="true"></time>
+        
+      </p>
+      
+        <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://blog.ontoillogical.com/drafts/sicp/index.html" data-via="mveytsman" data-counturl="http://blog.ontoillogical.com/drafts/sicp/index.html" >Tweet</a>
+  
+  
+  
+</div>
+
+      
+    </footer>
+  
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/12/12/last-days-of-the-pirate-bay/">Last Days of The Pirate Bay</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/10/18/solving-the-expression-problem-in-clojure/">Solving the Expression Problem in Clojure</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/28/how-to-take-over-any-java-developer/">How to take over the computer of any Java (or Clojure or Scala) developer</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/21/delimited-continuations-in-ruby-part-2/">Delimited Continuations in Ruby Part 2: Generators and Coroutines</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/07/12/delimited-continuations-in-ruby/">Delimited Continuations in Ruby Part 1</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  
+  <a href="https://github.com/mveytsman">@mveytsman</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'mveytsman',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2016 - Max Veytsman <br/>
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a>, customized with <a href="https://github.com/mjhea0/whiterspace">whiterspace</a>.</span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
