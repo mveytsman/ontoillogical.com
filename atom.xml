@@ -4,7 +4,7 @@
   <title><![CDATA[Ontoillogical]]></title>
   <link href="http://blog.ontoillogical.com/atom.xml" rel="self"/>
   <link href="http://blog.ontoillogical.com/"/>
-  <updated>2015-07-28T22:48:16-07:00</updated>
+  <updated>2016-03-05T17:01:36-05:00</updated>
   <id>http://blog.ontoillogical.com/</id>
   <author>
     <name><![CDATA[Max Veytsman]]></name>
@@ -18,7 +18,7 @@
     <title type="html"><![CDATA[Last Days of The Pirate Bay]]></title>
     <link href="http://blog.ontoillogical.com/blog/2014/12/12/last-days-of-the-pirate-bay/"/>
     
-    <updated>2014-12-12T10:55:36-08:00</updated>
+    <updated>2014-12-12T13:55:36-05:00</updated>
     <id>http://blog.ontoillogical.com/blog/2014/12/12/last-days-of-the-pirate-bay</id>
     
     <content type="html"><![CDATA[<p>I’ll be showing my BitTorrent video collage at <a href="http://www.torontolongwinter.com/">Long Winter</a> tonight.</p>
@@ -144,7 +144,7 @@
     <title type="html"><![CDATA[Solving the Expression Problem in Clojure]]></title>
     <link href="http://blog.ontoillogical.com/blog/2014/10/18/solving-the-expression-problem-in-clojure/"/>
     
-    <updated>2014-10-18T09:09:36-07:00</updated>
+    <updated>2014-10-18T12:09:36-04:00</updated>
     <id>http://blog.ontoillogical.com/blog/2014/10/18/solving-the-expression-problem-in-clojure</id>
     
     <content type="html"><![CDATA[<p>Last night, I was having a drink with a friend and he asked me what I
@@ -519,7 +519,7 @@ Without it, the function would look like this:</p>
     <title type="html"><![CDATA[How to take over the computer of any Java (or Clojure or Scala) developer]]></title>
     <link href="http://blog.ontoillogical.com/blog/2014/07/28/how-to-take-over-any-java-developer/"/>
     
-    <updated>2014-07-28T11:12:48-07:00</updated>
+    <updated>2014-07-28T14:12:48-04:00</updated>
     <id>http://blog.ontoillogical.com/blog/2014/07/28/how-to-take-over-any-java-developer</id>
     
     <content type="html"><![CDATA[<p><strong>Update: 07/31/2014</strong></p>
@@ -640,7 +640,7 @@ Without it, the function would look like this:</p>
     <title type="html"><![CDATA[Delimited Continuations in Ruby Part 2: Generators and Coroutines]]></title>
     <link href="http://blog.ontoillogical.com/blog/2014/07/21/delimited-continuations-in-ruby-part-2/"/>
     
-    <updated>2014-07-21T00:00:00-07:00</updated>
+    <updated>2014-07-21T03:00:00-04:00</updated>
     <id>http://blog.ontoillogical.com/blog/2014/07/21/delimited-continuations-in-ruby-part-2</id>
     
     <content type="html"><![CDATA[<p>Last <a href="http://blog.ontoillogical.com/blog/2014/07/12/delimited-continuations-in-ruby/">time</a>, I showed some basic things you can do with delimited continuations. If you’re still confused about them (as I am!) another good tutorial is <a href="http://community.schemewiki.org/?composable-continuations-tutorial">here</a>.</p>
@@ -957,7 +957,7 @@ Then I use it like so</p>
     <title type="html"><![CDATA[Delimited Continuations in Ruby Part 1]]></title>
     <link href="http://blog.ontoillogical.com/blog/2014/07/12/delimited-continuations-in-ruby/"/>
     
-    <updated>2014-07-12T09:30:00-07:00</updated>
+    <updated>2014-07-12T09:30:00-04:00</updated>
     <id>http://blog.ontoillogical.com/blog/2014/07/12/delimited-continuations-in-ruby</id>
     
     <content type="html"><![CDATA[<p>For the past few days at Hacker School, I’ve been exploring continuations. Continuations are hard to describe. Basically, a continuation represents the execution state of a program at a point. Capturing the continuation and invoking it later allows you to come back to that point in the programs execution. Continuations can be used to implement complicated control flow constructs.</p>
@@ -1165,7 +1165,7 @@ This is really cool! In delimited continuations, <code>k</code> is a <code>Proc<
     <title type="html"><![CDATA[Doorbot Overflow]]></title>
     <link href="http://blog.ontoillogical.com/blog/2014/07/03/doorbot-overflow/"/>
     
-    <updated>2014-07-03T19:21:00-07:00</updated>
+    <updated>2014-07-03T19:21:00-04:00</updated>
     <id>http://blog.ontoillogical.com/blog/2014/07/03/doorbot-overflow</id>
     
     <content type="html"><![CDATA[<p>Today was presentation day at Hacker School. I have a 10 minute talk about “building a better doorbot” which was secretly a talk about exploiting stack buffer overflows.  People seemed to enjoy it.</p>
@@ -1180,7 +1180,7 @@ This is really cool! In delimited continuations, <code>k</code> is a <code>Proc<
     <title type="html"><![CDATA[Hacker School: The First Three Weeks]]></title>
     <link href="http://blog.ontoillogical.com/blog/2014/06/29/hacker-school-the-first-three-weeks/"/>
     
-    <updated>2014-06-29T19:30:00-07:00</updated>
+    <updated>2014-06-29T19:30:00-04:00</updated>
     <id>http://blog.ontoillogical.com/blog/2014/06/29/hacker-school-the-first-three-weeks</id>
     
     <content type="html"><![CDATA[<p>For three weeks now, I’ve been at
@@ -1244,7 +1244,7 @@ game. Working on the emulator has helped me get better at reversing the MIPS ass
     <title type="html"><![CDATA[How to locate any Tinder user]]></title>
     <link href="http://blog.ontoillogical.com/blog/2014/02/25/how-to-locate-any-tinder-user/"/>
     
-    <updated>2014-02-25T10:09:00-08:00</updated>
+    <updated>2014-02-25T10:09:00-05:00</updated>
     <id>http://blog.ontoillogical.com/blog/2014/02/25/how-to-locate-any-tinder-user</id>
     
     <content type="html"><![CDATA[<p><strong>You can also find this post on my consultancy’s blog <a href="http://finite.state.io/blog/2014/02/25/how-to-locate-any-tinder-user/">here</a></strong></p>
@@ -1263,7 +1263,7 @@ game. Working on the emulator has helped me get better at reversing the MIPS ass
     <title type="html"><![CDATA[Thoughts On Bsidesto]]></title>
     <link href="http://blog.ontoillogical.com/blog/2013/11/30/thoughts-on-bsidesto/"/>
     
-    <updated>2013-11-30T12:00:00-08:00</updated>
+    <updated>2013-11-30T12:00:00-05:00</updated>
     <id>http://blog.ontoillogical.com/blog/2013/11/30/thoughts-on-bsidesto</id>
     
     <content type="html"><![CDATA[<p>** You can also find this post on my consultancy’s blog <a href="http://finite.state.io/blog/2013/11/30/thoughts-on-bsidesto/">here</a> **</p>
@@ -1313,7 +1313,7 @@ Each BSides is a community-driven framework for building events for and by infor
     <title type="html"><![CDATA[Hacking Letterpress]]></title>
     <link href="http://blog.ontoillogical.com/blog/2012/11/09/hacking-letterpress/"/>
     
-    <updated>2012-11-09T14:38:00-08:00</updated>
+    <updated>2012-11-09T14:38:00-05:00</updated>
     <id>http://blog.ontoillogical.com/blog/2012/11/09/hacking-letterpress</id>
     
     <content type="html"><![CDATA[<p><strong>You can also find this post on my consultancy’s blog <a href="http://finite.state.io/blog/2012/11/09/hacking-letterpress/">here</a></strong></p>
@@ -1404,7 +1404,7 @@ Here’s how it works:</p>
     <title type="html"><![CDATA[Breaking in and out of Vagrant]]></title>
     <link href="http://blog.ontoillogical.com/blog/2012/10/31/breaking-in-and-out-of-vagrant/"/>
     
-    <updated>2012-10-31T17:11:00-07:00</updated>
+    <updated>2012-10-31T17:11:00-04:00</updated>
     <id>http://blog.ontoillogical.com/blog/2012/10/31/breaking-in-and-out-of-vagrant</id>
     
     <content type="html"><![CDATA[<p>**You can also find this post on my consultancy’s blog <a href="http://finite.state.io/blog/2012/10/30/breaking-in-and-out-of-vagrant/">here</a> **</p>
@@ -1552,7 +1552,7 @@ hook will persist even if the user destroys the VM.</p>
     <title type="html"><![CDATA[My solutions to the Stripe CTF (web app edition)]]></title>
     <link href="http://blog.ontoillogical.com/blog/2012/08/30/my-solutions-to-the-stripe-ctf-web-app-edition/"/>
     
-    <updated>2012-08-30T17:55:00-07:00</updated>
+    <updated>2012-08-30T17:55:00-04:00</updated>
     <id>http://blog.ontoillogical.com/blog/2012/08/30/my-solutions-to-the-stripe-ctf-web-app-edition</id>
     
     <content type="html"><![CDATA[<p><strong>You can also find this post on my consultancy’s blog <a href="http://finite.state.io/blog/2012/08/30/my-solutions-to-the-stripe-ctf-web-app-edition/">here</a></strong></p>
